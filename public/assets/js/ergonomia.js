@@ -97,7 +97,7 @@ await loadData();
 
 async function loadData() {
   renderSkeletonTable(document.getElementById("tableWrapper"), 5, 5);
-  _all = await getErgonomicAssessments(companyId);
+  _all = (await getErgonomicAssessments(companyId)).filter((r) => !r.deleted);
   render();
 }
 

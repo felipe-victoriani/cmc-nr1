@@ -90,7 +90,7 @@ await loadData();
 
 async function loadData() {
   renderSkeletonTable(document.getElementById("tableWrapper"), 5, 5);
-  _all = await getIncidents(companyId);
+  _all = (await getIncidents(companyId)).filter((r) => !r.deleted);
   renderSummary();
   render();
 }

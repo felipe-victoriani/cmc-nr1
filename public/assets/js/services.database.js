@@ -643,7 +643,8 @@ export async function deleteDocument(id) {
 }
 
 // ── Usuários ───────────────────────────────────────────────
-export async function getUsers() {
+export async function getUsers(companyId = null) {
+  if (companyId) return dbListByField("users", "companyId", companyId);
   return dbList("users");
 }
 export async function getUserData(uid) {

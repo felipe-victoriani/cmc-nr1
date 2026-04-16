@@ -7,7 +7,12 @@ import { requireProfile } from "./guards.js";
 import { initAppUI, setBreadcrumb, openModal, showToast } from "./ui.js";
 import { getCurrentProfile, getCurrentUser } from "./auth.js";
 import { formatDate, exportCSV } from "./utils.js";
-import { getUsers, saveUser, getEstablishments } from "./services.database.js";
+import {
+  getUsers,
+  saveUser,
+  getEstablishments,
+  getCompanies,
+} from "./services.database.js";
 import { createUserWithProfile } from "./services.auth.js";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -38,6 +43,8 @@ const STATUS_BADGE = {
 let _all = [];
 let _filtered = [];
 let _establishments = {};
+let _establishmentsList = [];
+let _companies = [];
 let _companyId = null;
 let _editId = null;
 let _currentUid = null;
@@ -61,13 +68,17 @@ bindGlobalListeners();
 async function loadData() {
   showLoader(true);
   try {
-    const [users, ests] = await Promise.all([
+    const [users, ests, companies] = await Promise.all([
       getUsers(_companyId),
       getEstablishments(_companyId),
+      getCompanies(),
     ]);
 
+    _companies = (companies || []).filter((c) => !c.deleted);
+
     _establishments = {};
-    (ests || []).forEach((e) => (_establishments[e.id] = e.name));
+    _establishmentsList = ests || [];
+    _establishmentsList.forEach((e) => (_establishments[e.id] = e.name));
     populateEstFilter();
 
     _all = (users || []).filter((u) => !u.deleted);
@@ -107,14 +118,30 @@ function populateEstFilter() {
   // No establishment filter in users page (filter by role/status only)
 }
 
-function populateModalEst(currentVal) {
-  const sel = document.getElementById("userModalEst");
+function populateModalCompany(currentVal) {
+  const sel = document.getElementById("userModalCompany");
   if (!sel) return;
-  sel.innerHTML = '<option value="">Todos / Empresa</option>';
-  Object.entries(_establishments).forEach(([id, name]) => {
+  sel.innerHTML = '<option value="">Selecione a empresa...</option>';
+  _companies.forEach((c) => {
     sel.insertAdjacentHTML(
       "beforeend",
-      `<option value="${id}">${name}</option>`,
+      `<option value="${c.id}">${escapeHtml(c.name || c.razaoSocial || c.id)}</option>`,
+    );
+  });
+  if (currentVal) sel.value = currentVal;
+}
+
+function populateModalEst(currentVal, companyIdFilter) {
+  const sel = document.getElementById("userModalEst");
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Todos os estabelecimentos</option>';
+  const list = companyIdFilter
+    ? _establishmentsList.filter((e) => e.companyId === companyIdFilter)
+    : _establishmentsList;
+  list.forEach((e) => {
+    sel.insertAdjacentHTML(
+      "beforeend",
+      `<option value="${e.id}">${escapeHtml(e.name)}</option>`,
     );
   });
   if (currentVal) sel.value = currentVal;
@@ -138,6 +165,9 @@ function renderTable() {
         `<span class="badge badge-outline">${u.tipo || "—"}</span>`;
       const statusBadge = STATUS_BADGE[u.status ?? "active"] || "";
       const estName = _establishments[u.establishmentId] || "—";
+      const compName =
+        _companies.find((c) => c.id === u.companyId)?.name ||
+        (u.tipo === "admin_master" ? "— (global)" : "—");
       const isSelf = u.id === _currentUid;
 
       return `<tr${isSelf ? ' style="background:var(--clr-primary-50)"' : ""}>
@@ -151,6 +181,7 @@ function renderTable() {
         </div>
       </td>
       <td>${roleBadge}</td>
+      <td style="font-size:var(--text-xs)">${escapeHtml(compName)}</td>
       <td>${escapeHtml(estName)}</td>
       <td>${statusBadge}</td>
       <td>${u.createdAt ? formatDate(u.createdAt) : "—"}</td>
@@ -178,6 +209,7 @@ function renderTable() {
         <tr>
           <th>Usuário</th>
           <th>Perfil</th>
+          <th>Empresa</th>
           <th>Estabelecimento</th>
           <th>Status</th>
           <th>Criado em</th>
@@ -222,7 +254,18 @@ function openForm(id) {
     ],
   });
 
-  populateModalEst(user?.establishmentId || "");
+  populateModalCompany(user?.companyId || "");
+  populateModalEst(user?.establishmentId || "", user?.companyId || "");
+
+  // When company changes → reload establishments filtered by that company
+  setTimeout(() => {
+    const companySel = document.getElementById("userModalCompany");
+    if (companySel) {
+      companySel.addEventListener("change", () => {
+        populateModalEst("", companySel.value);
+      });
+    }
+  }, 50);
 
   // show/hide fields depending on create vs edit
   const pwdGroup = document.getElementById("passwordGroup");
@@ -261,6 +304,7 @@ async function saveForm() {
   const email = get("email");
   const password = get("password");
   const tipo = get("tipo");
+  const companyId = document.getElementById("userModalCompany")?.value || "";
   const establishmentId = document.getElementById("userModalEst")?.value || "";
   const status = get("status") || "active";
   const notes = get("notes");
@@ -268,6 +312,8 @@ async function saveForm() {
   if (!nome) return showToast("Nome é obrigatório.", "warning");
   if (!email) return showToast("E-mail é obrigatório.", "warning");
   if (!tipo) return showToast("Perfil é obrigatório.", "warning");
+  if (!companyId && tipo !== "admin_master")
+    return showToast("Selecione a empresa para este usuário.", "warning");
   if (!_editId && !password)
     return showToast("Senha é obrigatória para novo usuário.", "warning");
   if (!_editId && password.length < 8)
@@ -286,7 +332,8 @@ async function saveForm() {
         nome,
         email,
         tipo,
-        establishmentId,
+        companyId: companyId || null,
+        establishmentId: establishmentId || null,
         status,
         notes,
         updatedAt: new Date().toISOString(),
@@ -298,8 +345,8 @@ async function saveForm() {
       await createUserWithProfile(email, password, {
         nome,
         tipo,
-        companyId: _companyId,
-        establishmentId,
+        companyId: companyId || null,
+        establishmentId: establishmentId || null,
         notes,
         status: "active",
       });

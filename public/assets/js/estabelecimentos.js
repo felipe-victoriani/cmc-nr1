@@ -32,7 +32,7 @@ setBreadcrumb([
 ]);
 
 const profile = getCurrentProfile();
-const isAdmin = profile.profile === "admin_master";
+const isAdmin = profile.tipo === "admin_master";
 const companyId = profile.companyId || null;
 
 let _all = [];

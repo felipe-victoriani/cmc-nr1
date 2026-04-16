@@ -39,7 +39,7 @@ export async function requireProfile(profiles, redirectTo = "index.html") {
     setTimeout(() => {
       window.location.href = redirectTo;
     }, 1500);
-    return null;
+    throw new Error("unauthorized");
   }
   return user;
 }

@@ -59,7 +59,7 @@ await loadData();
 
 async function loadData() {
   renderSkeletonTable(document.getElementById("tableWrapper"), 5, 4);
-  _all = await getThirdParties(companyId);
+  _all = (await getThirdParties(companyId)).filter((r) => !r.deleted);
   render();
 }
 

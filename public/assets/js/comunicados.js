@@ -70,7 +70,7 @@ await loadData();
 async function loadData() {
   document.getElementById("commsContainer").innerHTML =
     `<div class="stats-grid">${Array(4).fill(`<div class="skeleton" style="height:120px;border-radius:12px"></div>`).join("")}</div>`;
-  _all = await getCommunications(companyId);
+  _all = (await getCommunications(companyId)).filter((r) => !r.deleted);
   render();
 }
 

@@ -13,6 +13,9 @@ import {
   getIncidents,
   getCommunications,
   getEstablishments,
+  getCompanies,
+  getDepartments,
+  getRoles,
 } from "./services.database.js";
 import { formatDate, daysUntil, urgencyClass, relativeTime } from "./utils.js";
 
@@ -24,44 +27,62 @@ setBreadcrumb([{ label: "Dashboard" }]);
 // INICIALIZAÇÃO
 // ──────────────────────────────────────────────────────────
 const profile = getCurrentProfile();
+const isAdmin = profile?.tipo === "admin_master";
 const companyId = profile?.companyId || null;
 
-try {
-  const [
-    employees,
-    risks,
-    actions,
-    trainings,
-    incidents,
-    comms,
-    establishments,
-  ] = await Promise.all([
-    getEmployees(companyId),
-    getRisks(companyId),
-    getActionPlans(companyId),
-    getTrainings(companyId),
-    getIncidents(companyId),
-    getCommunications(companyId),
-    getEstablishments(companyId),
-  ]);
+const keys = [
+  "employees",
+  "risks",
+  "actions",
+  "trainings",
+  "incidents",
+  "comms",
+  "establishments",
+  "companies",
+  "departments",
+  "roles",
+];
 
-  renderStats({
-    employees,
-    risks,
-    actions,
-    trainings,
-    incidents,
-    comms,
-    establishments,
-  });
-  renderRiskChart(risks);
-  renderActionChart(actions);
-  renderUrgentActions(actions, risks);
-  renderExpiringTrainings(trainings);
-} catch (err) {
-  showToast("Erro ao carregar dados: " + err.message, "error");
-  console.error(err);
+const results = await Promise.allSettled([
+  getEmployees(companyId),
+  getRisks(companyId),
+  getActionPlans(companyId),
+  getTrainings(companyId),
+  getIncidents(companyId),
+  getCommunications(companyId),
+  getEstablishments(isAdmin ? null : companyId),
+  isAdmin ? getCompanies() : Promise.resolve([]),
+  getDepartments(isAdmin ? null : companyId),
+  getRoles(isAdmin ? null : companyId),
+]);
+
+const data = {};
+let hasError = false;
+results.forEach((r, i) => {
+  if (r.status === "fulfilled") {
+    data[keys[i]] = r.value;
+  } else {
+    console.warn(
+      `[dashboard] Falha ao carregar "${keys[i]}":`,
+      r.reason?.message,
+    );
+    data[keys[i]] = [];
+    hasError = true;
+  }
+});
+
+if (hasError) {
+  showToast(
+    "Alguns dados não puderam ser carregados. Verifique o console.",
+    "warning",
+  );
 }
+
+renderStats({ ...data, isAdmin });
+renderRiskChart(data.risks);
+renderActionChart(data.actions);
+renderUrgentActions(data.actions, data.risks);
+renderExpiringTrainings(data.trainings);
 
 // ──────────────────────────────────────────────────────────
 // CARDS DE ESTATÍSTICAS
@@ -74,6 +95,10 @@ function renderStats({
   incidents,
   comms,
   establishments,
+  companies,
+  departments,
+  roles,
+  isAdmin,
 }) {
   const now = new Date();
   const monthStart = new Date(
@@ -86,6 +111,11 @@ function renderStats({
   const activeEst = establishments.filter(
     (e) => e.status !== "inactive",
   ).length;
+  const activeCompanies = companies.filter(
+    (c) => c.status !== "inactive",
+  ).length;
+  const activeDepts = departments.filter((d) => d.status !== "inactive").length;
+  const activeRoles = roles.filter((r) => r.status !== "inactive").length;
   const criticalRisk = risks.filter((r) => r.riskLevel === "critical").length;
   const openActions = actions.filter(
     (a) =>
@@ -109,6 +139,19 @@ function renderStats({
   ).length;
 
   const cards = [
+    // Card de Empresas — visível apenas para admin_master
+    ...(isAdmin
+      ? [
+          {
+            label: "Empresas",
+            value: activeCompanies,
+            sub: `${companies.length} cadastradas`,
+            color: "primary",
+            icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="12.01"/></svg>`,
+            href: "empresas.html",
+          },
+        ]
+      : []),
     {
       label: "Trabalhadores Ativos",
       value: activeEmp,
@@ -124,6 +167,22 @@ function renderStats({
       color: "primary",
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M9 21V7l7-4v18M9 10.5H3v10.5"/></svg>`,
       href: "estabelecimentos.html",
+    },
+    {
+      label: "Setores",
+      value: activeDepts,
+      sub: `${departments.length} cadastrados`,
+      color: "primary",
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`,
+      href: "setores.html",
+    },
+    {
+      label: "Cargos",
+      value: activeRoles,
+      sub: `${roles.length} cadastrados`,
+      color: "primary",
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 00-16 0"/></svg>`,
+      href: "cargos.html",
     },
     {
       label: "Riscos Cadastrados",

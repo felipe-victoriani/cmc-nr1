@@ -20,6 +20,7 @@ import {
   saveDepartment,
   deleteDepartment,
   getEstablishments,
+  getCompanies,
 } from "./services.database.js";
 import { validateForm, clearOnInput } from "./validators.js";
 import { formatDate } from "./utils.js";
@@ -33,15 +34,21 @@ setBreadcrumb([
 ]);
 
 const profile = getCurrentProfile();
+const isAdmin = profile.tipo === "admin_master";
 const companyId = profile.companyId || null;
 
 let _all = [];
 let _establishments = [];
+let _companies = [];
 let _page = 1;
 const PER_PAGE = 20;
 
-// ── Carrega estabelecimentos para o filtro ─────────────────
+// ── Carrega dados de apoio ─────────────────────────────────
+if (isAdmin) {
+  _companies = await getCompanies();
+}
 _establishments = await getEstablishments(companyId);
+
 const filterEst = document.getElementById("filterEstablishment");
 _establishments.forEach((e) => {
   const opt = document.createElement("option");
@@ -153,18 +160,42 @@ function render() {
     });
 }
 
-function openForm(item = null) {
-  const tpl = document.getElementById("tplModal");
-  const body = document.createElement("div");
-  body.innerHTML = tpl.innerHTML;
-
-  const sel = body.querySelector("#selectEstablishment");
-  _establishments.forEach((e) => {
+function buildEstablishmentOptions(sel, filterByCompany = null) {
+  const list = filterByCompany
+    ? _establishments.filter((e) => e.companyId === filterByCompany)
+    : _establishments;
+  sel.innerHTML = '<option value="">Selecione</option>';
+  list.forEach((e) => {
     const opt = document.createElement("option");
     opt.value = e.id;
     opt.textContent = e.name;
     sel.appendChild(opt);
   });
+}
+
+function openForm(item = null) {
+  const tpl = document.getElementById("tplModal");
+  const body = document.createElement("div");
+  body.innerHTML = tpl.innerHTML;
+
+  // Para admin_master: insere seletor de empresa antes do estabelecimento
+  if (isAdmin) {
+    const gEst = body.querySelector("#g-establishmentId");
+    const gCompany = document.createElement("div");
+    gCompany.className = "form-group col-span-full";
+    gCompany.id = "g-companyId";
+    gCompany.innerHTML = `
+      <label class="form-label">Empresa <span class="required">*</span></label>
+      <select class="form-control" name="companyId" id="selectCompanySetor">
+        <option value="">Selecione a empresa</option>
+        ${_companies.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")}
+      </select>
+      <span class="form-error">Obrigatório.</span>`;
+    gEst.parentNode.insertBefore(gCompany, gEst);
+  }
+
+  const sel = body.querySelector("#selectEstablishment");
+  buildEstablishmentOptions(sel, isAdmin ? item?.companyId || null : null);
 
   openModal({
     title: item ? "Editar Setor" : "Novo Setor",
@@ -179,6 +210,16 @@ function openForm(item = null) {
       },
     ],
   });
+
+  // Cascata empresa → estabelecimento para admin_master
+  if (isAdmin) {
+    const selComp = document.querySelector(".modal-body #selectCompanySetor");
+    const selEst = document.querySelector(".modal-body #selectEstablishment");
+    selComp?.addEventListener("change", () => {
+      buildEstablishmentOptions(selEst, selComp.value || null);
+    });
+    if (item?.companyId) selComp.value = item.companyId;
+  }
 
   if (item) {
     ["establishmentId", "name", "description", "managerName", "status"].forEach(
@@ -195,12 +236,22 @@ function openForm(item = null) {
 }
 
 async function submitForm(id = null) {
-  const { valid, data } = validateForm(document.querySelector(".modal-body"), {
+  const rules = {
     establishmentId: { required: true, label: "Estabelecimento" },
     name: { required: true, label: "Nome do Setor" },
-  });
+  };
+  if (isAdmin) rules.companyId = { required: true, label: "Empresa" };
+  const { valid, data } = validateForm(
+    document.querySelector(".modal-body"),
+    rules,
+  );
   if (!valid) return;
-  data.companyId = companyId;
+  if (!isAdmin) data.companyId = companyId;
+  // Para admin, o companyId vem do form; garante consistência com o estabelecimento selecionado
+  if (isAdmin && data.establishmentId) {
+    const est = _establishments.find((e) => e.id === data.establishmentId);
+    if (est) data.companyId = est.companyId;
+  }
   try {
     await saveDepartment(data, id);
     showToast(id ? "Setor atualizado!" : "Setor criado!", "success");

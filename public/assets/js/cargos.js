@@ -15,7 +15,12 @@ import {
   renderSkeletonTable,
 } from "./ui.js";
 import { getCurrentProfile } from "./auth.js";
-import { getRoles, saveRole, deleteRole } from "./services.database.js";
+import {
+  getRoles,
+  saveRole,
+  deleteRole,
+  getCompanies,
+} from "./services.database.js";
 import { validateForm, clearOnInput } from "./validators.js";
 import { formatDate } from "./utils.js";
 
@@ -28,11 +33,17 @@ setBreadcrumb([
 ]);
 
 const profile = getCurrentProfile();
+const isAdmin = profile.tipo === "admin_master";
 const companyId = profile.companyId || null;
 
 let _all = [];
+let _companies = [];
 let _page = 1;
 const PER_PAGE = 20;
+
+if (isAdmin) {
+  _companies = await getCompanies();
+}
 
 const RISK_BADGE = {
   low: `<span class="badge badge-success">Baixo</span>`,
@@ -142,9 +153,26 @@ function render() {
 
 function openForm(item = null) {
   const tpl = document.getElementById("tplModal");
+  const body = document.createElement("div");
+  body.innerHTML = tpl.innerHTML;
+
+  if (isAdmin) {
+    const firstGroup = body.querySelector(".form-group");
+    const gCompany = document.createElement("div");
+    gCompany.className = "form-group col-span-full";
+    gCompany.innerHTML = `
+      <label class="form-label">Empresa <span class="required">*</span></label>
+      <select class="form-control" name="companyId" id="selectCompanyCargo">
+        <option value="">Selecione a empresa</option>
+        ${_companies.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")}
+      </select>
+      <span class="form-error">Obrigatório.</span>`;
+    firstGroup.parentNode.insertBefore(gCompany, firstGroup);
+  }
+
   openModal({
     title: item ? "Editar Cargo" : "Novo Cargo",
-    body: tpl.innerHTML,
+    body: body.innerHTML,
     size: "modal-md",
     footer: [
       { label: "Cancelar", class: "btn btn-secondary", handler: closeModal },
@@ -155,6 +183,7 @@ function openForm(item = null) {
       },
     ],
   });
+
   if (item) {
     [
       "name",
@@ -170,16 +199,23 @@ function openForm(item = null) {
           ? (el.value = item[f] || "")
           : (el.value = item[f] || "");
     });
+    if (isAdmin && item.companyId) {
+      const sel = document.querySelector(".modal-body #selectCompanyCargo");
+      if (sel) sel.value = item.companyId;
+    }
   }
   clearOnInput(document.querySelector(".modal-body"));
 }
 
 async function submitForm(id = null) {
-  const { valid, data } = validateForm(document.querySelector(".modal-body"), {
-    name: { required: true, label: "Cargo" },
-  });
+  const rules = { name: { required: true, label: "Cargo" } };
+  if (isAdmin) rules.companyId = { required: true, label: "Empresa" };
+  const { valid, data } = validateForm(
+    document.querySelector(".modal-body"),
+    rules,
+  );
   if (!valid) return;
-  data.companyId = companyId;
+  if (!isAdmin) data.companyId = companyId;
   try {
     await saveRole(data, id);
     showToast(id ? "Cargo atualizado!" : "Cargo criado!", "success");

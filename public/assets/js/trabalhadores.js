@@ -22,6 +22,7 @@ import {
   getEstablishments,
   getDepartments,
   getRoles,
+  getCompanies,
 } from "./services.database.js";
 import { validateForm, clearOnInput } from "./validators.js";
 import {
@@ -41,12 +42,14 @@ setBreadcrumb([
 ]);
 
 const profile = getCurrentProfile();
+const isAdmin = profile.tipo === "admin_master";
 const companyId = profile.companyId || null;
 
 let _all = [];
 let _establishments = [];
 let _departments = [];
 let _roles = [];
+let _companies = [];
 let _page = 1;
 const PER_PAGE = 20;
 
@@ -57,8 +60,7 @@ const STATUS_BADGE = {
   vacation: `<span class="badge badge-info">Férias</span>`,
 };
 
-// ── Pré-carrega listas de apoio ───────────────────────────
-[_establishments, _departments, _roles] = await Promise.all([
+// ── Pré-carrega listas de apoio ───────────────────────────if (isAdmin) _companies = await getCompanies();[_establishments, _departments, _roles] = await Promise.all([
   getEstablishments(companyId),
   getDepartments(companyId),
   getRoles(companyId),
@@ -197,10 +199,28 @@ function openForm(item = null) {
   const body = document.createElement("div");
   body.innerHTML = tpl.innerHTML;
 
-  // Popula selects
+  // Para admin_master: insere seletor de empresa no topo com cascata
+  if (isAdmin) {
+    const firstGroup = body.querySelector(".form-group");
+    const gCompany = document.createElement("div");
+    gCompany.className = "form-group col-span-full";
+    gCompany.innerHTML = `
+      <label class="form-label">Empresa <span class="required">*</span></label>
+      <select class="form-control" name="companyId" id="selCompanyTrab">
+        <option value="">Selecione a empresa</option>
+        ${_companies.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")}
+      </select>
+      <span class="form-error">Obrigatório.</span>`;
+    firstGroup.parentNode.insertBefore(gCompany, firstGroup);
+  }
+
+  const filterByCompany = isAdmin ? (item?.companyId || null) : null;
+
+  // Popula selects filtrando pela empresa quando admin
   const popSel = (id, arr) => {
     const el = body.querySelector(id);
     if (!el) return;
+    el.innerHTML = '<option value="">Selecione</option>';
     arr.forEach((a) => {
       const o = document.createElement("option");
       o.value = a.id;
@@ -208,9 +228,20 @@ function openForm(item = null) {
       el.appendChild(o);
     });
   };
-  popSel("#selEstablishment", _establishments);
-  popSel("#selDepartment", _departments);
-  popSel("#selRole", _roles);
+
+  const estsByCompany = filterByCompany
+    ? _establishments.filter((e) => e.companyId === filterByCompany)
+    : _establishments;
+  const depsByCompany = filterByCompany
+    ? _departments.filter((d) => d.companyId === filterByCompany)
+    : _departments;
+  const rolesByCompany = filterByCompany
+    ? _roles.filter((r) => r.companyId === filterByCompany)
+    : _roles;
+
+  popSel("#selEstablishment", estsByCompany);
+  popSel("#selDepartment", depsByCompany);
+  popSel("#selRole", rolesByCompany);
 
   openModal({
     title: item ? "Editar Trabalhador" : "Novo Trabalhador",
@@ -225,6 +256,30 @@ function openForm(item = null) {
       },
     ],
   });
+
+  // Cascata empresa → estabelecimento/setor/cargo para admin
+  if (isAdmin) {
+    const selComp = document.querySelector(".modal-body #selCompanyTrab");
+    selComp?.addEventListener("change", () => {
+      const cId = selComp.value || null;
+      const updateSel = (selector, arr) => {
+        const el = document.querySelector(".modal-body " + selector);
+        if (!el) return;
+        el.innerHTML = '<option value="">Selecione</option>';
+        const filtered = cId ? arr.filter((x) => x.companyId === cId) : arr;
+        filtered.forEach((a) => {
+          const o = document.createElement("option");
+          o.value = a.id;
+          o.textContent = a.name;
+          el.appendChild(o);
+        });
+      };
+      updateSel("#selEstablishment", _establishments);
+      updateSel("#selDepartment", _departments);
+      updateSel("#selRole", _roles);
+    });
+    if (item?.companyId) selComp.value = item.companyId;
+  }
 
   if (item) {
     const fields = [
@@ -258,15 +313,22 @@ function openForm(item = null) {
 }
 
 async function submitForm(id = null) {
-  const { valid, data } = validateForm(document.querySelector(".modal-body"), {
+  const rules = {
     fullName: { required: true, label: "Nome Completo" },
     cpf: { required: true, cpf: true, label: "CPF" },
     establishmentId: { required: true, label: "Estabelecimento" },
     email: { email: true, label: "E-mail" },
-  });
+  };
+  if (isAdmin) rules.companyId = { required: true, label: "Empresa" };
+  const { valid, data } = validateForm(document.querySelector(".modal-body"), rules);
   if (!valid) return;
 
-  data.companyId = companyId;
+  if (!isAdmin) data.companyId = companyId;
+  // Para admin: garante companyId consistente com o estabelecimento selecionado
+  if (isAdmin && data.establishmentId) {
+    const est = _establishments.find((e) => e.id === data.establishmentId);
+    if (est) data.companyId = est.companyId;
+  }
   data.cpf = maskCPF(data.cpf || "");
 
   try {

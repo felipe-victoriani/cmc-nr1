@@ -84,7 +84,14 @@ export function isMaxLength(value, max) {
  */
 export function validateForm(formEl, rules) {
   const errors = {};
+  const data = {};
   let valid = true;
+
+  // Coleta todos os campos do formulário
+  formEl.querySelectorAll("[name]").forEach((input) => {
+    const name = input.getAttribute("name");
+    if (name) data[name] = input.value;
+  });
 
   // Limpa erros anteriores
   formEl
@@ -139,7 +146,7 @@ export function validateForm(formEl, rules) {
     firstError?.focus();
   }
 
-  return { valid, errors };
+  return { valid, errors, data };
 }
 
 /**

@@ -78,7 +78,8 @@ setBreadcrumb([
   { label: "Início", href: "index.html" },
   { label: "Relatórios" },
 ]);
-_companyId = getCurrentProfile()?.companyId || null;
+const _isAdmin = getCurrentProfile()?.tipo === "admin_master";
+_companyId = _isAdmin ? null : getCurrentProfile()?.companyId || null;
 loadAll();
 bindListeners();
 

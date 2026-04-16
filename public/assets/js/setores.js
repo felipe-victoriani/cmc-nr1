@@ -35,7 +35,7 @@ setBreadcrumb([
 
 const profile = getCurrentProfile();
 const isAdmin = profile.tipo === "admin_master";
-const companyId = profile.companyId || null;
+const companyId = isAdmin ? null : profile.companyId || null;
 
 let _all = [];
 let _establishments = [];

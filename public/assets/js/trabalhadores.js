@@ -43,7 +43,7 @@ setBreadcrumb([
 
 const profile = getCurrentProfile();
 const isAdmin = profile.tipo === "admin_master";
-const companyId = profile.companyId || null;
+const companyId = isAdmin ? null : profile.companyId || null;
 
 let _all = [];
 let _establishments = [];
@@ -60,7 +60,9 @@ const STATUS_BADGE = {
   vacation: `<span class="badge badge-info">Férias</span>`,
 };
 
-// ── Pré-carrega listas de apoio ───────────────────────────if (isAdmin) _companies = await getCompanies();[_establishments, _departments, _roles] = await Promise.all([
+// ── Pré-carrega listas de apoio ───────────────────────────
+if (isAdmin) _companies = await getCompanies();
+[_establishments, _departments, _roles] = await Promise.all([
   getEstablishments(companyId),
   getDepartments(companyId),
   getRoles(companyId),
@@ -214,7 +216,7 @@ function openForm(item = null) {
     firstGroup.parentNode.insertBefore(gCompany, firstGroup);
   }
 
-  const filterByCompany = isAdmin ? (item?.companyId || null) : null;
+  const filterByCompany = isAdmin ? item?.companyId || null : null;
 
   // Popula selects filtrando pela empresa quando admin
   const popSel = (id, arr) => {
@@ -320,7 +322,10 @@ async function submitForm(id = null) {
     email: { email: true, label: "E-mail" },
   };
   if (isAdmin) rules.companyId = { required: true, label: "Empresa" };
-  const { valid, data } = validateForm(document.querySelector(".modal-body"), rules);
+  const { valid, data } = validateForm(
+    document.querySelector(".modal-body"),
+    rules,
+  );
   if (!valid) return;
 
   if (!isAdmin) data.companyId = companyId;

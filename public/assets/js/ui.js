@@ -565,12 +565,13 @@ export function openModal({
   }
 
   // Botões do rodapé
-  footer.forEach((f) => {
+  const footerBtns = modal.querySelectorAll(".modal-footer .btn");
+  footer.forEach((f, i) => {
     const btn = f.id
       ? modal.querySelector(`#${f.id}`)
       : f.action
         ? modal.querySelector(`[data-action="${f.action}"]`)
-        : null;
+        : footerBtns[i] || null;
     if (!btn) return;
     if (f.action === "close" || f.close) {
       btn.addEventListener("click", closeModal);

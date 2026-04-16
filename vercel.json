@@ -1,5 +1,4 @@
 {
-  "buildCommand": "node build.js",
   "outputDirectory": "public",
   "routes": [{ "src": "^/$", "dest": "/login.html" }]
 }

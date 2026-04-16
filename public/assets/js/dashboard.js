@@ -78,11 +78,29 @@ if (hasError) {
   );
 }
 
-renderStats({ ...data, isAdmin });
+renderStats({ ...data, isAdmin, profile });
 renderRiskChart(data.risks);
 renderActionChart(data.actions);
 renderUrgentActions(data.actions, data.risks);
 renderExpiringTrainings(data.trainings);
+
+// Ocultar secoes de SST para perfis nao-SST
+const sstProfiles = [
+  "admin_master",
+  "gestor_rh",
+  "gestor_unidade",
+  "tecnico_sst",
+];
+if (!sstProfiles.includes(profile?.tipo)) {
+  const chartsRow = document
+    .getElementById("riskChart")
+    ?.closest(".dashboard-grid-2");
+  if (chartsRow) chartsRow.style.display = "none";
+  const urgentCard = document
+    .getElementById("urgentActionsList")
+    ?.closest(".card");
+  if (urgentCard) urgentCard.style.display = "none";
+}
 
 // ──────────────────────────────────────────────────────────
 // CARDS DE ESTATÍSTICAS
@@ -99,6 +117,7 @@ function renderStats({
   departments,
   roles,
   isAdmin,
+  profile,
 }) {
   const now = new Date();
   const monthStart = new Date(
@@ -106,6 +125,17 @@ function renderStats({
     now.getMonth(),
     1,
   ).toISOString();
+
+  const tipo = profile?.tipo || (isAdmin ? "admin_master" : "");
+  const HR = ["admin_master", "gestor_rh", "gestor_unidade"];
+  const SST = ["admin_master", "gestor_rh", "gestor_unidade", "tecnico_sst"];
+  const TODOS = [
+    "admin_master",
+    "gestor_rh",
+    "gestor_unidade",
+    "tecnico_sst",
+    "colaborador",
+  ];
 
   const activeEmp = employees.filter((e) => e.status !== "inactive").length;
   const activeEst = establishments.filter(
@@ -116,7 +146,9 @@ function renderStats({
   ).length;
   const activeDepts = departments.filter((d) => d.status !== "inactive").length;
   const activeRoles = roles.filter((r) => r.status !== "inactive").length;
-  const criticalRisk = risks.filter((r) => r.riskLevel === "critical").length;
+  const criticalRisk = risks.filter(
+    (r) => String(r.riskLevel || "").toLowerCase() === "critical",
+  ).length;
   const openActions = actions.filter(
     (a) =>
       !["concluida", "cancelada", "completed", "cancelled"].includes(a.status),
@@ -139,19 +171,15 @@ function renderStats({
   ).length;
 
   const cards = [
-    // Card de Empresas — visível apenas para admin_master
-    ...(isAdmin
-      ? [
-          {
-            label: "Empresas",
-            value: activeCompanies,
-            sub: `${companies.length} cadastradas`,
-            color: "primary",
-            icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="12.01"/></svg>`,
-            href: "empresas.html",
-          },
-        ]
-      : []),
+    {
+      label: "Empresas",
+      value: activeCompanies,
+      sub: `${companies.length} cadastradas`,
+      color: "primary",
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="12.01"/></svg>`,
+      href: "empresas.html",
+      profiles: ["admin_master"],
+    },
     {
       label: "Trabalhadores Ativos",
       value: activeEmp,
@@ -159,6 +187,7 @@ function renderStats({
       color: "success",
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>`,
       href: "trabalhadores.html",
+      profiles: HR,
     },
     {
       label: "Estabelecimentos",
@@ -167,6 +196,7 @@ function renderStats({
       color: "primary",
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M9 21V7l7-4v18M9 10.5H3v10.5"/></svg>`,
       href: "estabelecimentos.html",
+      profiles: ["admin_master"],
     },
     {
       label: "Setores",
@@ -175,6 +205,7 @@ function renderStats({
       color: "primary",
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`,
       href: "setores.html",
+      profiles: HR,
     },
     {
       label: "Cargos",
@@ -183,6 +214,7 @@ function renderStats({
       color: "primary",
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 00-16 0"/></svg>`,
       href: "cargos.html",
+      profiles: HR,
     },
     {
       label: "Riscos Cadastrados",
@@ -191,6 +223,7 @@ function renderStats({
       color: criticalRisk > 0 ? "danger" : "warning",
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
       href: "riscos.html",
+      profiles: SST,
     },
     {
       label: "Ações em Aberto",
@@ -199,6 +232,7 @@ function renderStats({
       color: overdueAct > 0 ? "danger" : "primary",
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>`,
       href: "plano-acao.html",
+      profiles: SST,
     },
     {
       label: "Treins. Vencendo",
@@ -207,6 +241,7 @@ function renderStats({
       color: expTrainings > 0 ? "warning" : "success",
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>`,
       href: "treinamentos.html",
+      profiles: TODOS,
     },
     {
       label: "Incidentes (mês)",
@@ -215,6 +250,7 @@ function renderStats({
       color: monthInc > 0 ? "danger" : "success",
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.9 4.9A10 10 0 1119.1 19.1 10 10 0 014.9 4.9z"/><line x1="4.9" y1="19.1" x2="19.1" y2="4.9"/></svg>`,
       href: "incidentes.html",
+      profiles: SST,
     },
     {
       label: "Comunicados Pendentes",
@@ -223,6 +259,7 @@ function renderStats({
       color: pendingComms > 0 ? "warning" : "success",
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`,
       href: "comunicados.html",
+      profiles: TODOS,
     },
     {
       label: "Total de Riscos Críticos",
@@ -231,8 +268,9 @@ function renderStats({
       color: criticalRisk > 0 ? "danger" : "success",
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
       href: "riscos.html",
+      profiles: SST,
     },
-  ];
+  ].filter((c) => c.profiles.includes(tipo));
 
   const grid = document.getElementById("statsGrid");
   grid.innerHTML = cards

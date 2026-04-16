@@ -11,6 +11,7 @@ import { getUserProfile as fetchProfileFromDB } from "./services.auth.js";
 // Estado em memória do módulo
 let _currentUser = null;
 let _currentProfile = null;
+let _isReady = false;
 
 // Resolvida após a primeira verificação de auth
 let _readyResolve;
@@ -31,6 +32,7 @@ onAuthStateChanged(auth, async (user) => {
     _currentUser = null;
     _currentProfile = null;
   }
+  _isReady = true;
   _readyResolve(); // sinaliza que o estado inicial foi resolvido
 });
 

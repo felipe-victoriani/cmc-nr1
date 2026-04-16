@@ -167,6 +167,7 @@ const NAV_CONFIG = [
           "admin_master",
           "gestor_rh",
           "gestor_unidade",
+          "tecnico_sst",
           "colaborador",
         ],
       },

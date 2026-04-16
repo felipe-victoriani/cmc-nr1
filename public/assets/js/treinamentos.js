@@ -29,6 +29,7 @@ await requireProfile([
   "gestor_rh",
   "gestor_unidade",
   "tecnico_sst",
+  "colaborador",
 ]);
 await initAppUI();
 setBreadcrumb([
@@ -39,6 +40,7 @@ setBreadcrumb([
 
 const profile = getCurrentProfile();
 const isAdmin = profile.tipo === "admin_master";
+const isReadOnly = profile.tipo === "colaborador";
 const companyId = isAdmin ? null : profile.companyId || null;
 
 let _all = [];
@@ -66,6 +68,12 @@ _establishments.forEach((e) => {
 });
 
 document.getElementById("btnNew").addEventListener("click", () => openForm());
+if (isReadOnly) {
+  const btn = document.getElementById("btnNew");
+  if (btn) btn.style.display = "none";
+  const btnExp = document.getElementById("btnExport");
+  if (btnExp) btnExp.style.display = "none";
+}
 document.getElementById("btnExport").addEventListener("click", doExport);
 document.getElementById("searchInput").addEventListener("input", () => {
   _page = 1;
@@ -160,8 +168,12 @@ function render() {
           <td style="font-size:var(--text-sm)">${t.workload ? t.workload + "h" : "—"}</td>
           <td><span class="badge ${badgeMap[status]}">${labelMap[status]}</span></td>
           <td><div style="display:flex;gap:var(--sp-1)">
-            <button class="btn btn-ghost btn-icon btn-sm" data-action="edit" data-id="${t.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-            <button class="btn btn-ghost btn-icon btn-sm text-danger" data-action="delete" data-id="${t.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+            ${
+              isReadOnly
+                ? ""
+                : `<button class=\"btn btn-ghost btn-icon btn-sm\" data-action=\"edit\" data-id=\"${t.id}\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7\"/><path d=\"M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z\"/></svg></button>
+            <button class=\"btn btn-ghost btn-icon btn-sm text-danger\" data-action=\"delete\" data-id=\"${t.id}\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"3 6 5 6 21 6\"/><path d=\"M19 6l-1 14H6L5 6\"/><path d=\"M10 11v6M14 11v6\"/><path d=\"M9 6V4h6v2\"/></svg></button>`
+            }
           </div></td>
         </tr>`;
         })

@@ -3,6 +3,11 @@
 // ============================================================
 
 import { auth, db } from "./firebase-init.js";
+import { firebaseConfig } from "./firebase-config.js";
+import {
+  initializeApp,
+  deleteApp,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   signInWithEmailAndPassword,
   signOut,
@@ -12,6 +17,7 @@ import {
   updateEmail,
   reauthenticateWithCredential,
   EmailAuthProvider,
+  getAuth,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   ref,
@@ -37,26 +43,49 @@ export async function resetPassword(email) {
 
 /**
  * Cria usuário no Firebase Auth e salva perfil no RTDB.
- * Uso exclusivo do admin.
+ * Usa um App Firebase secundário para NÃO substituir a sessão
+ * do admin logado (createUserWithEmailAndPassword faz login
+ * automático — usando app secundário isso é isolado).
  */
 export async function createUserWithProfile(email, password, profileData) {
-  const cred = await createUserWithEmailAndPassword(
-    auth,
-    email.trim(),
-    password,
-  );
-  const uid = cred.user.uid;
-  const ts = new Date().toISOString();
+  const secondaryAppName = `secondary-create-${Date.now()}`;
+  let secondaryApp = null;
 
-  await set(ref(db, `users/${uid}`), {
-    ...profileData,
-    email: email.trim(),
-    active: true,
-    createdAt: ts,
-    updatedAt: ts,
-  });
+  try {
+    secondaryApp = initializeApp(firebaseConfig, secondaryAppName);
+    const secondaryAuth = getAuth(secondaryApp);
 
-  return uid;
+    const cred = await createUserWithEmailAndPassword(
+      secondaryAuth,
+      email.trim(),
+      password,
+    );
+    const uid = cred.user.uid;
+    const ts = new Date().toISOString();
+
+    // Desloga do app secundário imediatamente
+    await signOut(secondaryAuth);
+
+    // Salva perfil no RTDB usando a conexão principal (admin ainda logado)
+    await set(ref(db, `users/${uid}`), {
+      ...profileData,
+      email: email.trim(),
+      active: true,
+      createdAt: ts,
+      updatedAt: ts,
+    });
+
+    return uid;
+  } finally {
+    // Limpa o app secundário para evitar vazamento de recursos
+    if (secondaryApp) {
+      try {
+        await deleteApp(secondaryApp);
+      } catch {
+        // ignora — pode já ter sido deletado
+      }
+    }
+  }
 }
 
 /** Busca o perfil do usuário no RTDB */

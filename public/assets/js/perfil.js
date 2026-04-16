@@ -6,7 +6,12 @@
 import { requireAuth } from "./guards.js";
 import { initAppUI, setBreadcrumb, showToast } from "./ui.js";
 import { getCurrentUser } from "./auth.js";
-import { getUserData, saveUser } from "./services.database.js";
+import {
+  getUserData,
+  saveUser,
+  getCompany,
+  getEstablishment,
+} from "./services.database.js";
 import { changePassword } from "./services.auth.js";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -64,6 +69,27 @@ async function loadProfile() {
         ? new Date(authUser.metadata.lastSignInTime).toLocaleString("pt-BR")
         : "—",
     );
+
+    // Empresa / Estabelecimento (para não-admin)
+    if (tipo !== "admin_master") {
+      if (userData?.companyId) {
+        const company = await getCompany(userData.companyId).catch(() => null);
+        const companyBlock = document.getElementById("infoCompanyBlock");
+        if (companyBlock) companyBlock.style.display = "";
+        setText(
+          "infoCompany",
+          company?.name || company?.razaoSocial || userData.companyId,
+        );
+      }
+      if (userData?.establishmentId) {
+        const est = await getEstablishment(userData.establishmentId).catch(
+          () => null,
+        );
+        const estBlock = document.getElementById("infoEstBlock");
+        if (estBlock) estBlock.style.display = "";
+        setText("infoEst", est?.name || userData.establishmentId);
+      }
+    }
   } catch (err) {
     console.error(err);
     showToast("Erro ao carregar perfil.", "error");

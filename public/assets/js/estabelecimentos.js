@@ -24,7 +24,7 @@ import {
 import { validateForm, clearOnInput } from "./validators.js";
 import { formatDate, applyAllMasks } from "./utils.js";
 
-await requireProfile(["admin_master", "gestor_rh", "gestor_unidade"]);
+await requireProfile(["admin_master"]);
 await initAppUI();
 setBreadcrumb([
   { label: "Início", href: "index.html" },

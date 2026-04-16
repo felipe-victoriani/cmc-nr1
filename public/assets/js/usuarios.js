@@ -58,7 +58,11 @@ setBreadcrumb([
   { label: "Configurações" },
   { label: "Usuários" },
 ]);
-_companyId = getCurrentProfile()?.companyId || null;
+// admin_master vê todos os usuários, independente de ter companyId no perfil
+_companyId =
+  getCurrentProfile()?.tipo === "admin_master"
+    ? null
+    : getCurrentProfile()?.companyId || null;
 _currentUid = getCurrentUser()?.uid || null;
 loadData();
 bindGlobalListeners();

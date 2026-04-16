@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comunicados · CMV Contabilidade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/reset.css" />
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/layout.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/pages.css" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <span class="brand-icon"
+            ><svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg
+          ></span>
+          <span class="brand-name">CMV Contabilidade</span>
+        </div>
+        <nav class="sidebar-nav" id="sidebarNav"></nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-user" id="sidebarUser"></div>
+        </div>
+        <button
+          class="sidebar-close-btn"
+          id="sidebarClose"
+          aria-label="Fechar menu"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="20"
+            height="20"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </aside>
+      <div class="sidebar-overlay hidden" id="sidebarOverlay"></div>
+
+      <div class="main-wrapper" id="mainWrapper">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button
+              class="topbar-menu-btn"
+              id="topbarMenuBtn"
+              aria-label="Menu"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <nav
+              class="breadcrumb"
+              id="breadcrumb"
+              aria-label="Breadcrumb"
+            ></nav>
+          </div>
+          <div class="topbar-right">
+            <div class="topbar-user" id="topbarUser"></div>
+          </div>
+        </header>
+
+        <main class="main-content">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Comunicados</h1>
+              <p class="page-subtitle">
+                Avisos, alertas de segurança e comunicações internas
+              </p>
+            </div>
+            <div style="display: flex; gap: var(--sp-2)">
+              <button class="btn btn-primary" id="btnNew">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  style="width: 16px; height: 16px"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Novo Comunicado
+              </button>
+            </div>
+          </div>
+
+          <!-- Filtros -->
+          <div class="card" style="margin-bottom: var(--sp-4)">
+            <div class="card-body" style="padding: var(--sp-3)">
+              <div class="form-grid" style="grid-template-columns: 3fr 1fr 1fr">
+                <div class="form-group" style="margin: 0">
+                  <div class="input-wrapper">
+                    <span class="input-icon"
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" /></svg
+                    ></span>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="searchInput"
+                      placeholder="Pesquisar comunicados..."
+                    />
+                  </div>
+                </div>
+                <div class="form-group" style="margin: 0">
+                  <select class="form-control" id="filterType">
+                    <option value="">Todos os Tipos</option>
+                    <option value="safety_alert">Alerta de Segurança</option>
+                    <option value="policy">Política / Norma</option>
+                    <option value="general">Geral</option>
+                    <option value="urgent">Urgente</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin: 0">
+                  <select class="form-control" id="filterStatus">
+                    <option value="">Todos os Status</option>
+                    <option value="active">Ativo</option>
+                    <option value="archived">Arquivado</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lista de comunicados -->
+          <div id="commsContainer"></div>
+          <div
+            id="paginationContainer"
+            style="display: none; margin-top: var(--sp-4)"
+          ></div>
+        </main>
+      </div>
+    </div>
+
+    <!-- TEMPLATE MODAL -->
+    <template id="tplModal">
+      <div class="form-grid" style="gap: var(--sp-4)">
+        <div class="form-group col-span-full">
+          <label class="form-label">Título *</label>
+          <input
+            type="text"
+            class="form-control"
+            name="title"
+            placeholder="Ex: Alerta — Uso obrigatório de EPI na área de produção"
+          />
+          <span class="form-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tipo *</label>
+          <select class="form-control" name="type">
+            <option value="">Selecione...</option>
+            <option value="safety_alert">Alerta de Segurança</option>
+            <option value="policy">Política / Norma</option>
+            <option value="general">Geral</option>
+            <option value="urgent">Urgente</option>
+          </select>
+          <span class="form-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" name="status">
+            <option value="active">Ativo</option>
+            <option value="archived">Arquivado</option>
+          </select>
+        </div>
+
+        <div class="form-group col-span-full">
+          <label class="form-label">Conteúdo / Mensagem *</label>
+          <textarea
+            class="form-control"
+            name="content"
+            rows="6"
+            placeholder="Texto completo do comunicado..."
+          ></textarea>
+          <span class="form-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Data de Publicação</label>
+          <input type="date" class="form-control" name="publishDate" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Data de Expiração</label>
+          <input type="date" class="form-control" name="expirationDate" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Autor</label>
+          <input
+            type="text"
+            class="form-control"
+            name="author"
+            placeholder="Nome do autor"
+          />
+        </div>
+      </div>
+    </template>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <div
+      class="modal-backdrop hidden"
+      id="modalBackdrop"
+      aria-hidden="true"
+    ></div>
+    <div class="global-loader hidden" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+
+    <script type="module" src="assets/js/comunicados.js"></script>
+  </body>
+</html>

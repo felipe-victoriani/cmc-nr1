@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trabalhadores | CMV Contabilidade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/reset.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/layout.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/pages.css" />
+  </head>
+  <body class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+              />
+            </svg>
+          </div>
+          <span class="brand-name">CMV Contabilidade</span>
+        </div>
+        <button class="sidebar-close-btn" id="sidebarClose">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="20"
+            height="20"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav"></nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user" id="sidebarUser"></div>
+      </div>
+    </aside>
+    <div class="sidebar-overlay hidden" id="sidebarOverlay"></div>
+    <div class="main-wrapper" id="mainWrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-menu-btn icon-btn" id="topbarMenuBtn">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="20"
+              height="20"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <nav class="breadcrumb" id="breadcrumb"></nav>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-user" id="topbarUser"></div>
+        </div>
+      </header>
+      <main class="main-content" id="mainContent">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Trabalhadores</h1>
+            <p class="page-subtitle">
+              Cadastro de colaboradores, vínculos e dados ocupacionais
+            </p>
+          </div>
+          <div style="display: flex; gap: var(--sp-3)">
+            <button class="btn btn-secondary" id="btnExport">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="16"
+                height="16"
+              >
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Exportar CSV
+            </button>
+            <button class="btn btn-primary" id="btnNew">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="16"
+                height="16"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Novo Trabalhador
+            </button>
+          </div>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            gap: var(--sp-3);
+            flex-wrap: wrap;
+            margin-bottom: var(--sp-4);
+          "
+        >
+          <div class="input-wrapper" style="flex: 1; min-width: 220px">
+            <svg
+              class="input-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="search"
+              class="form-control"
+              id="searchInput"
+              placeholder="Buscar por nome, CPF ou matrícula…"
+            />
+          </div>
+          <select
+            class="form-control"
+            id="filterEstablishment"
+            style="width: 180px"
+          >
+            <option value="">Todos estabelecimentos</option>
+          </select>
+          <select
+            class="form-control"
+            id="filterDepartment"
+            style="width: 160px"
+          >
+            <option value="">Todos setores</option>
+          </select>
+          <select class="form-control" id="filterStatus" style="width: 160px">
+            <option value="">Todos status</option>
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+            <option value="on_leave">Afastado</option>
+            <option value="vacation">Férias</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="table-wrapper" id="tableWrapper"></div>
+          <div
+            class="card-footer"
+            id="paginationContainer"
+            style="display: none"
+          ></div>
+        </div>
+      </main>
+    </div>
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+    <div class="modal-backdrop hidden" id="modalBackdrop"></div>
+    <div class="global-loader hidden" id="globalLoader">
+      <div class="spinner spinner-lg"></div>
+    </div>
+
+    <template id="tplModal">
+      <div class="form-grid form-grid-2">
+        <!-- Dados pessoais -->
+        <div class="form-group col-span-full">
+          <label
+            class="form-label"
+            style="
+              font-size: var(--text-xs);
+              font-weight: var(--font-semi);
+              color: var(--clr-text-muted);
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            "
+            >Dados Pessoais</label
+          >
+        </div>
+        <div class="form-group col-span-full" id="g-fullName">
+          <label class="form-label"
+            >Nome Completo <span class="required">*</span></label
+          >
+          <input
+            type="text"
+            class="form-control"
+            name="fullName"
+            placeholder="Nome completo do trabalhador"
+          />
+          <span class="form-error">Campo obrigatório.</span>
+        </div>
+        <div class="form-group" id="g-cpf">
+          <label class="form-label">CPF <span class="required">*</span></label>
+          <input
+            type="text"
+            class="form-control"
+            name="cpf"
+            placeholder="000.000.000-00"
+            data-mask="cpf"
+          />
+          <span class="form-error">CPF inválido.</span>
+        </div>
+        <div class="form-group" id="g-rg">
+          <label class="form-label">RG</label>
+          <input
+            type="text"
+            class="form-control"
+            name="rg"
+            placeholder="0.000.000"
+          />
+        </div>
+        <div class="form-group" id="g-birthDate">
+          <label class="form-label">Data de Nascimento</label>
+          <input type="date" class="form-control" name="birthDate" />
+        </div>
+        <div class="form-group" id="g-gender">
+          <label class="form-label">Gênero</label>
+          <select class="form-control" name="gender">
+            <option value="">Não informado</option>
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+            <option value="O">Outro</option>
+          </select>
+        </div>
+        <div class="form-group" id="g-phone">
+          <label class="form-label">Telefone</label>
+          <input
+            type="text"
+            class="form-control"
+            name="phone"
+            placeholder="(00) 00000-0000"
+            data-mask="phone"
+          />
+        </div>
+        <div class="form-group" id="g-email">
+          <label class="form-label">E-mail</label>
+          <input
+            type="email"
+            class="form-control"
+            name="email"
+            placeholder="trabalhador@email.com"
+          />
+          <span class="form-error">E-mail inválido.</span>
+        </div>
+        <!-- Vínculo -->
+        <div class="form-group col-span-full" style="margin-top: var(--sp-2)">
+          <label
+            class="form-label"
+            style="
+              font-size: var(--text-xs);
+              font-weight: var(--font-semi);
+              color: var(--clr-text-muted);
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            "
+            >Vínculo Empregatício</label
+          >
+        </div>
+        <div class="form-group" id="g-establishmentId">
+          <label class="form-label"
+            >Estabelecimento <span class="required">*</span></label
+          >
+          <select
+            class="form-control"
+            name="establishmentId"
+            id="selEstablishment"
+          >
+            <option value="">Selecione</option>
+          </select>
+          <span class="form-error">Obrigatório.</span>
+        </div>
+        <div class="form-group" id="g-departmentId">
+          <label class="form-label">Setor</label>
+          <select class="form-control" name="departmentId" id="selDepartment">
+            <option value="">Selecione</option>
+          </select>
+        </div>
+        <div class="form-group" id="g-roleId">
+          <label class="form-label">Cargo / Função</label>
+          <select class="form-control" name="roleId" id="selRole">
+            <option value="">Selecione</option>
+          </select>
+        </div>
+        <div class="form-group" id="g-contractType">
+          <label class="form-label">Tipo de Contrato</label>
+          <select class="form-control" name="contractType">
+            <option value="clt">CLT</option>
+            <option value="pj">PJ</option>
+            <option value="internship">Estágio</option>
+            <option value="apprentice">Aprendiz</option>
+            <option value="temporary">Temporário</option>
+          </select>
+        </div>
+        <div class="form-group" id="g-admissionDate">
+          <label class="form-label">Data de Admissão</label>
+          <input type="date" class="form-control" name="admissionDate" />
+        </div>
+        <div class="form-group" id="g-registration">
+          <label class="form-label">Matrícula</label>
+          <input
+            type="text"
+            class="form-control"
+            name="registration"
+            placeholder="Nº de matrícula"
+          />
+        </div>
+        <div class="form-group" id="g-status">
+          <label class="form-label">Status</label>
+          <select class="form-control" name="status">
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+            <option value="on_leave">Afastado</option>
+            <option value="vacation">Férias</option>
+          </select>
+        </div>
+        <!-- Contato de emergência -->
+        <div class="form-group col-span-full" style="margin-top: var(--sp-2)">
+          <label
+            class="form-label"
+            style="
+              font-size: var(--text-xs);
+              font-weight: var(--font-semi);
+              color: var(--clr-text-muted);
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            "
+            >Contato de Emergência</label
+          >
+        </div>
+        <div class="form-group" id="g-emergencyContact">
+          <label class="form-label">Nome</label>
+          <input
+            type="text"
+            class="form-control"
+            name="emergencyContact"
+            placeholder="Nome do contato"
+          />
+        </div>
+        <div class="form-group" id="g-emergencyPhone">
+          <label class="form-label">Telefone</label>
+          <input
+            type="text"
+            class="form-control"
+            name="emergencyPhone"
+            placeholder="(00) 00000-0000"
+            data-mask="phone"
+          />
+        </div>
+        <div class="form-group col-span-full" id="g-notes">
+          <label class="form-label">Observações</label>
+          <textarea
+            class="form-control"
+            name="notes"
+            rows="2"
+            placeholder="Observações…"
+          ></textarea>
+        </div>
+      </div>
+    </template>
+
+    <script type="module" src="assets/js/trabalhadores.js"></script>
+  </body>
+</html>

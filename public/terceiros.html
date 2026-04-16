@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Terceiros · CMV Contabilidade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/reset.css" />
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/layout.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/pages.css" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <span class="brand-icon"
+            ><svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg
+          ></span>
+          <span class="brand-name">CMV Contabilidade</span>
+        </div>
+        <nav class="sidebar-nav" id="sidebarNav"></nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-user" id="sidebarUser"></div>
+        </div>
+        <button
+          class="sidebar-close-btn"
+          id="sidebarClose"
+          aria-label="Fechar menu"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="20"
+            height="20"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </aside>
+      <div class="sidebar-overlay hidden" id="sidebarOverlay"></div>
+
+      <div class="main-wrapper" id="mainWrapper">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button
+              class="topbar-menu-btn"
+              id="topbarMenuBtn"
+              aria-label="Menu"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <nav
+              class="breadcrumb"
+              id="breadcrumb"
+              aria-label="Breadcrumb"
+            ></nav>
+          </div>
+          <div class="topbar-right">
+            <div class="topbar-user" id="topbarUser"></div>
+          </div>
+        </header>
+
+        <main class="main-content">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Terceiros e Prestadores</h1>
+              <p class="page-subtitle">
+                Controle de empresas e profissionais terceirizados
+              </p>
+            </div>
+            <div style="display: flex; gap: var(--sp-2)">
+              <button class="btn btn-secondary" id="btnExport">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  style="width: 16px; height: 16px"
+                >
+                  <path
+                    d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"
+                  />
+                </svg>
+                Exportar
+              </button>
+              <button class="btn btn-primary" id="btnNew">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  style="width: 16px; height: 16px"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Cadastrar Terceiro
+              </button>
+            </div>
+          </div>
+
+          <!-- Filtros -->
+          <div class="card" style="margin-bottom: var(--sp-4)">
+            <div class="card-body" style="padding: var(--sp-3)">
+              <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr">
+                <div class="form-group" style="margin: 0">
+                  <div class="input-wrapper">
+                    <span class="input-icon"
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" /></svg
+                    ></span>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="searchInput"
+                      placeholder="Pesquisar terceiros..."
+                    />
+                  </div>
+                </div>
+                <div class="form-group" style="margin: 0">
+                  <select class="form-control" id="filterType">
+                    <option value="">Todos os Tipos</option>
+                    <option value="company">Empresa</option>
+                    <option value="individual">Pessoa Física</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin: 0">
+                  <select class="form-control" id="filterStatus">
+                    <option value="">Todos os Status</option>
+                    <option value="active">Ativo</option>
+                    <option value="inactive">Inativo</option>
+                    <option value="pending_docs">Documentação Pendente</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela -->
+          <div class="card">
+            <div class="card-body" style="padding: 0">
+              <div class="table-wrapper" id="tableWrapper"></div>
+            </div>
+            <div
+              class="card-footer"
+              id="paginationContainer"
+              style="display: none"
+            ></div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- TEMPLATE MODAL -->
+    <template id="tplModal">
+      <div class="form-grid" style="gap: var(--sp-4)">
+        <div class="form-group">
+          <label class="form-label">Tipo *</label>
+          <select class="form-control" name="thirdPartyType">
+            <option value="">Selecione...</option>
+            <option value="company">Empresa / PJ</option>
+            <option value="individual">Pessoa Física / Autônomo</option>
+          </select>
+          <span class="form-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" name="status">
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+            <option value="pending_docs">Documentação Pendente</option>
+          </select>
+        </div>
+
+        <div class="form-group col-span-full">
+          <label class="form-label">Nome / Razão Social *</label>
+          <input
+            type="text"
+            class="form-control"
+            name="name"
+            placeholder="Nome completo ou Razão Social"
+          />
+          <span class="form-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">CPF / CNPJ</label>
+          <input
+            type="text"
+            class="form-control"
+            name="document"
+            data-mask="cnpj"
+            placeholder="00.000.000/0000-00"
+            maxlength="18"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input
+            type="text"
+            class="form-control"
+            name="phone"
+            data-mask="phone"
+            placeholder="(00) 00000-0000"
+            maxlength="15"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input
+            type="email"
+            class="form-control"
+            name="email"
+            placeholder="contato@empresa.com"
+          />
+          <span class="form-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Contato Responsável</label>
+          <input
+            type="text"
+            class="form-control"
+            name="contactName"
+            placeholder="Nome do responsável de contato"
+          />
+        </div>
+
+        <div class="form-group col-span-full">
+          <label class="form-label">Serviços Prestados</label>
+          <textarea
+            class="form-control"
+            name="services"
+            rows="2"
+            placeholder="Descreva os serviços ou atividades realizadas..."
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Início do Contrato</label>
+          <input type="date" class="form-control" name="contractStart" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Término do Contrato</label>
+          <input type="date" class="form-control" name="contractEnd" />
+        </div>
+
+        <div class="form-group col-span-full">
+          <label class="form-label">Documentos Exigidos</label>
+          <input
+            type="text"
+            class="form-control"
+            name="requiredDocs"
+            placeholder="Ex: ASO, NR-35, NR-10..."
+          />
+        </div>
+
+        <div class="form-group col-span-full">
+          <label class="form-label">Observações</label>
+          <textarea
+            class="form-control"
+            name="notes"
+            rows="2"
+            placeholder="Informações adicionais..."
+          ></textarea>
+        </div>
+      </div>
+    </template>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <div
+      class="modal-backdrop hidden"
+      id="modalBackdrop"
+      aria-hidden="true"
+    ></div>
+    <div class="global-loader hidden" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+
+    <script type="module" src="assets/js/terceiros.js"></script>
+  </body>
+</html>

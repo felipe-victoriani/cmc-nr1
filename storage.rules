@@ -1,0 +1,32 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Qualquer usuário autenticado pode ler arquivos
+    // Escrita exige autenticação; controle fino é feito pela aplicação
+    match /companies/{companyId}/{allPaths=**} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.size < 20 * 1024 * 1024   // max 20 MB
+                    && (request.resource.contentType.matches('image/.*')
+                     || request.resource.contentType.matches('application/pdf')
+                     || request.resource.contentType.matches('application/vnd.openxmlformats.*')
+                     || request.resource.contentType.matches('application/msword')
+                     || request.resource.contentType.matches('text/.*'));
+      allow delete: if request.auth != null;
+    }
+
+    // Fotos de perfil de usuário
+    match /profile-photos/{userId}/{fileName} {
+      allow read:   if request.auth != null;
+      allow write:  if request.auth != null && request.auth.uid == userId
+                    && request.resource.size < 5 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+    }
+
+    // Bloqueia tudo que não for mapeado
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

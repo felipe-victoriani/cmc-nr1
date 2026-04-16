@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Riscos · CMV Contabilidade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/reset.css" />
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/layout.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/pages.css" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <!-- SIDEBAR -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <span class="brand-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </span>
+          <span class="brand-name">CMV Contabilidade</span>
+        </div>
+        <nav class="sidebar-nav" id="sidebarNav"></nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-user" id="sidebarUser"></div>
+        </div>
+        <button
+          class="sidebar-close-btn"
+          id="sidebarClose"
+          aria-label="Fechar menu"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="20"
+            height="20"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </aside>
+      <div class="sidebar-overlay hidden" id="sidebarOverlay"></div>
+
+      <!-- MAIN -->
+      <div class="main-wrapper" id="mainWrapper">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button
+              class="topbar-menu-btn"
+              id="topbarMenuBtn"
+              aria-label="Menu"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <nav
+              class="breadcrumb"
+              id="breadcrumb"
+              aria-label="Breadcrumb"
+            ></nav>
+          </div>
+          <div class="topbar-right">
+            <div class="topbar-user" id="topbarUser"></div>
+          </div>
+        </header>
+
+        <main class="main-content">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Inventário de Riscos</h1>
+              <p class="page-subtitle">
+                Identificação e gerenciamento de riscos conforme NR-1 PGR
+              </p>
+            </div>
+            <div style="display: flex; gap: var(--sp-2)">
+              <button class="btn btn-secondary" id="btnExport">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  style="width: 16px; height: 16px"
+                >
+                  <path
+                    d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"
+                  />
+                </svg>
+                Exportar
+              </button>
+              <button class="btn btn-primary" id="btnNew">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  style="width: 16px; height: 16px"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Novo Risco
+              </button>
+            </div>
+          </div>
+
+          <!-- Resumo por nível -->
+          <div class="stats-grid" id="riskSummary"></div>
+
+          <!-- Filtros -->
+          <div class="card" style="margin-bottom: var(--sp-4)">
+            <div class="card-body" style="padding: var(--sp-3)">
+              <div
+                class="form-grid"
+                style="grid-template-columns: 2fr 1fr 1fr 1fr"
+              >
+                <div class="form-group" style="margin: 0">
+                  <div class="input-wrapper">
+                    <span class="input-icon">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                      </svg>
+                    </span>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="searchInput"
+                      placeholder="Pesquisar riscos..."
+                    />
+                  </div>
+                </div>
+                <div class="form-group" style="margin: 0">
+                  <select class="form-control" id="filterHazardType">
+                    <option value="">Tipo de Perigo</option>
+                    <option value="chemical">Químico</option>
+                    <option value="physical">Físico</option>
+                    <option value="biological">Biológico</option>
+                    <option value="ergonomic">Ergonômico</option>
+                    <option value="accident">Acidente</option>
+                    <option value="psychosocial">Psicossocial</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin: 0">
+                  <select class="form-control" id="filterRiskLevel">
+                    <option value="">Nível de Risco</option>
+                    <option value="low">Baixo</option>
+                    <option value="medium">Médio</option>
+                    <option value="high">Alto</option>
+                    <option value="critical">Crítico</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin: 0">
+                  <select class="form-control" id="filterEstablishment">
+                    <option value="">Todos os Estabelecimentos</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela -->
+          <div class="card">
+            <div class="card-body" style="padding: 0">
+              <div class="table-wrapper" id="tableWrapper"></div>
+            </div>
+            <div
+              class="card-footer"
+              id="paginationContainer"
+              style="display: none"
+            ></div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- TEMPLATE MODAL -->
+    <template id="tplModal">
+      <div class="form-grid" style="gap: var(--sp-4)">
+        <div style="grid-column: 1/-1">
+          <p
+            style="
+              font-size: var(--text-sm);
+              font-weight: var(--font-semi);
+              color: var(--clr-text);
+              border-bottom: 1px solid var(--clr-border);
+              padding-bottom: var(--sp-2);
+              margin-bottom: var(--sp-3);
+            "
+          >
+            Identificação do Perigo
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tipo de Perigo *</label>
+          <select class="form-control" name="hazardType">
+            <option value="">Selecione...</option>
+            <option value="chemical">Químico</option>
+            <option value="physical">Físico</option>
+            <option value="biological">Biológico</option>
+            <option value="ergonomic">Ergonômico</option>
+            <option value="accident">Acidente</option>
+            <option value="psychosocial">Psicossocial</option>
+          </select>
+          <span class="form-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Estabelecimento *</label>
+          <select class="form-control" name="establishmentId" id="riskModalEst">
+            <option value="">Selecione...</option>
+          </select>
+          <span class="form-error"></span>
+        </div>
+
+        <div class="form-group col-span-full">
+          <label class="form-label"
+            >Descrição do Perigo / Fator de Risco *</label
+          >
+          <textarea
+            class="form-control"
+            name="description"
+            rows="3"
+            placeholder="Ex: Exposição a ruído acima de 85 dB(A) durante jornada de trabalho..."
+          ></textarea>
+          <span class="form-error"></span>
+        </div>
+
+        <div class="form-group col-span-full">
+          <label class="form-label">Trabalhadores Expostos</label>
+          <input
+            type="text"
+            class="form-control"
+            name="affectedWorkers"
+            placeholder="Ex: Todos os operadores do setor de produção"
+          />
+        </div>
+
+        <div style="grid-column: 1/-1">
+          <p
+            style="
+              font-size: var(--text-sm);
+              font-weight: var(--font-semi);
+              color: var(--clr-text);
+              border-bottom: 1px solid var(--clr-border);
+              padding-bottom: var(--sp-2);
+              margin-bottom: var(--sp-3);
+            "
+          >
+            Avaliação do Risco
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Probabilidade (1–5) *</label>
+          <select class="form-control" name="probability" id="riskProb">
+            <option value="">Selecione...</option>
+            <option value="1">1 – Improvável</option>
+            <option value="2">2 – Remota</option>
+            <option value="3">3 – Possível</option>
+            <option value="4">4 – Provável</option>
+            <option value="5">5 – Quase Certo</option>
+          </select>
+          <span class="form-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Severidade (1–5) *</label>
+          <select class="form-control" name="severity" id="riskSev">
+            <option value="">Selecione...</option>
+            <option value="1">1 – Insignificante</option>
+            <option value="2">2 – Menor</option>
+            <option value="3">3 – Moderado</option>
+            <option value="4">4 – Sério</option>
+            <option value="5">5 – Catastrófico</option>
+          </select>
+          <span class="form-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nível de Risco (calculado)</label>
+          <div
+            id="riskLevelPreview"
+            style="
+              height: 38px;
+              display: flex;
+              align-items: center;
+              padding: 0 var(--sp-3);
+              border: 1px solid var(--clr-border);
+              border-radius: 8px;
+              background: var(--clr-bg);
+              font-size: var(--text-sm);
+              color: var(--clr-text-muted);
+            "
+          >
+            — Selecione probabilidade e severidade
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Próxima Revisão</label>
+          <input type="date" class="form-control" name="nextReview" />
+        </div>
+
+        <div style="grid-column: 1/-1">
+          <p
+            style="
+              font-size: var(--text-sm);
+              font-weight: var(--font-semi);
+              color: var(--clr-text);
+              border-bottom: 1px solid var(--clr-border);
+              padding-bottom: var(--sp-2);
+              margin-bottom: var(--sp-3);
+            "
+          >
+            Controles
+          </p>
+        </div>
+
+        <div class="form-group col-span-full">
+          <label class="form-label">Controles Existentes</label>
+          <textarea
+            class="form-control"
+            name="existingControls"
+            rows="2"
+            placeholder="EPIs utilizados, procedimentos, barreiras..."
+          ></textarea>
+        </div>
+
+        <div class="form-group col-span-full">
+          <label class="form-label">Controles Propostos / Ações</label>
+          <textarea
+            class="form-control"
+            name="proposedControls"
+            rows="2"
+            placeholder="Medidas de eliminação ou redução do risco..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" name="status">
+            <option value="identified">Identificado</option>
+            <option value="in_control">Em Controle</option>
+            <option value="controlled">Controlado</option>
+            <option value="residual">Risco Residual</option>
+          </select>
+        </div>
+      </div>
+    </template>
+
+    <!-- UI -->
+    <div class="toast-container" id="toastContainer"></div>
+    <div
+      class="modal-backdrop hidden"
+      id="modalBackdrop"
+      aria-hidden="true"
+    ></div>
+    <div class="global-loader hidden" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+
+    <script type="module" src="assets/js/riscos.js"></script>
+  </body>
+</html>

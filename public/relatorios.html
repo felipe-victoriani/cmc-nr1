@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relatórios · CMV Contabilidade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/reset.css" />
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/layout.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/pages.css" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <span class="brand-icon"
+            ><svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg
+          ></span>
+          <span class="brand-name">CMV Contabilidade</span>
+        </div>
+        <nav class="sidebar-nav" id="sidebarNav"></nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-user" id="sidebarUser"></div>
+        </div>
+        <button
+          class="sidebar-close-btn"
+          id="sidebarClose"
+          aria-label="Fechar menu"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="20"
+            height="20"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </aside>
+      <div class="sidebar-overlay hidden" id="sidebarOverlay"></div>
+
+      <div class="main-wrapper" id="mainWrapper">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button
+              class="topbar-menu-btn"
+              id="topbarMenuBtn"
+              aria-label="Menu"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <nav
+              class="breadcrumb"
+              id="breadcrumb"
+              aria-label="Breadcrumb"
+            ></nav>
+          </div>
+          <div class="topbar-right">
+            <div class="topbar-user" id="topbarUser"></div>
+          </div>
+        </header>
+
+        <main class="main-content">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Relatórios</h1>
+              <p class="page-subtitle">
+                Visão consolidada de conformidade NR-1 — SST
+              </p>
+            </div>
+            <button class="btn btn-primary" id="btnPrint">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                style="width: 16px; height: 16px"
+              >
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path
+                  d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+                />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              Imprimir / Exportar PDF
+            </button>
+          </div>
+
+          <!-- KPIs gerais -->
+          <div
+            class="stats-grid"
+            id="kpiGrid"
+            style="margin-bottom: var(--sp-6)"
+          >
+            <div class="stat-card skeleton-card" id="kpiWorkers">
+              <div class="stat-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <div>
+                <div class="stat-value" id="kpiWorkersVal">—</div>
+                <div class="stat-label">Trabalhadores Ativos</div>
+              </div>
+            </div>
+            <div class="stat-card skeleton-card" id="kpiRisks">
+              <div class="stat-icon icon-danger">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                  />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <div>
+                <div class="stat-value" id="kpiRisksVal">—</div>
+                <div class="stat-label">Riscos Críticos/Altos</div>
+              </div>
+            </div>
+            <div class="stat-card skeleton-card" id="kpiActions">
+              <div class="stat-icon icon-warning">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <div>
+                <div class="stat-value" id="kpiActionsVal">—</div>
+                <div class="stat-label">Ações Pendentes/Vencidas</div>
+              </div>
+            </div>
+            <div class="stat-card skeleton-card" id="kpiTrainings">
+              <div class="stat-icon icon-info">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                </svg>
+              </div>
+              <div>
+                <div class="stat-value" id="kpiTrainingsVal">—</div>
+                <div class="stat-label">Treinamentos Vencidos</div>
+              </div>
+            </div>
+            <div class="stat-card skeleton-card" id="kpiIncidents">
+              <div class="stat-icon icon-danger">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+                  />
+                  <line x1="15" y1="9" x2="9" y2="15" />
+                  <line x1="9" y1="9" x2="15" y2="15" />
+                </svg>
+              </div>
+              <div>
+                <div class="stat-value" id="kpiIncidentsVal">—</div>
+                <div class="stat-label">Incidentes (últimos 12 meses)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Riscos por Nível -->
+          <div class="report-section" style="margin-bottom: var(--sp-6)">
+            <div class="card">
+              <div
+                class="card-header"
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                "
+              >
+                <h2 class="card-title">Riscos por Nível</h2>
+                <button class="btn btn-sm btn-outline" id="btnExportRisks">
+                  Exportar CSV
+                </button>
+              </div>
+              <div class="card-body">
+                <div
+                  id="riskChartWrap"
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: var(--sp-4);
+                  "
+                >
+                  <div id="riskBarsWrap"></div>
+                  <div id="riskTableWrap"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Plano de Ação -->
+          <div class="report-section" style="margin-bottom: var(--sp-6)">
+            <div class="card">
+              <div
+                class="card-header"
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                "
+              >
+                <h2 class="card-title">Plano de Ação — Status</h2>
+                <button class="btn btn-sm btn-outline" id="btnExportActions">
+                  Exportar CSV
+                </button>
+              </div>
+              <div class="card-body">
+                <div id="actionsWrap"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Treinamentos -->
+          <div class="report-section" style="margin-bottom: var(--sp-6)">
+            <div class="card">
+              <div
+                class="card-header"
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                "
+              >
+                <h2 class="card-title">Treinamentos — Controle de Validade</h2>
+                <button class="btn btn-sm btn-outline" id="btnExportTrainings">
+                  Exportar CSV
+                </button>
+              </div>
+              <div class="card-body">
+                <div id="trainingsWrap"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção: Incidentes por Tipo -->
+          <div class="report-section" style="margin-bottom: var(--sp-6)">
+            <div class="card">
+              <div
+                class="card-header"
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                "
+              >
+                <h2 class="card-title">Incidentes por Tipo</h2>
+                <button class="btn btn-sm btn-outline" id="btnExportIncidents">
+                  Exportar CSV
+                </button>
+              </div>
+              <div class="card-body">
+                <div id="incidentsWrap"></div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <div
+      class="modal-backdrop hidden"
+      id="modalBackdrop"
+      aria-hidden="true"
+    ></div>
+    <div class="global-loader hidden" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+
+    <script type="module" src="assets/js/relatorios.js"></script>
+  </body>
+</html>

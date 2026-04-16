@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Setores | CMV Contabilidade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/reset.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/layout.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/pages.css" />
+  </head>
+  <body class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+              />
+            </svg>
+          </div>
+          <span class="brand-name">CMV Contabilidade</span>
+        </div>
+        <button class="sidebar-close-btn" id="sidebarClose">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="20"
+            height="20"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav"></nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user" id="sidebarUser"></div>
+      </div>
+    </aside>
+    <div class="sidebar-overlay hidden" id="sidebarOverlay"></div>
+    <div class="main-wrapper" id="mainWrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-menu-btn icon-btn" id="topbarMenuBtn">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="20"
+              height="20"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <nav class="breadcrumb" id="breadcrumb"></nav>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-user" id="topbarUser"></div>
+        </div>
+      </header>
+      <main class="main-content" id="mainContent">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Setores</h1>
+            <p class="page-subtitle">
+              Áreas e setores das unidades operacionais
+            </p>
+          </div>
+          <button class="btn btn-primary" id="btnNew">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="16"
+              height="16"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Novo Setor
+          </button>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            gap: var(--sp-3);
+            flex-wrap: wrap;
+            margin-bottom: var(--sp-4);
+          "
+        >
+          <div class="input-wrapper" style="flex: 1; min-width: 200px">
+            <svg
+              class="input-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="search"
+              class="form-control"
+              id="searchInput"
+              placeholder="Buscar setor…"
+            />
+          </div>
+          <select
+            class="form-control"
+            id="filterEstablishment"
+            style="width: 200px"
+          >
+            <option value="">Todos estabelecimentos</option>
+          </select>
+          <select class="form-control" id="filterStatus" style="width: 140px">
+            <option value="">Todos status</option>
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="table-wrapper" id="tableWrapper"></div>
+          <div
+            class="card-footer"
+            id="paginationContainer"
+            style="display: none"
+          ></div>
+        </div>
+      </main>
+    </div>
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+    <div class="modal-backdrop hidden" id="modalBackdrop"></div>
+    <div class="global-loader hidden" id="globalLoader">
+      <div class="spinner spinner-lg"></div>
+    </div>
+
+    <template id="tplModal">
+      <div
+        class="form-grid"
+        style="grid-template-columns: 1fr 1fr; gap: var(--sp-4)"
+      >
+        <div class="form-group col-span-full" id="g-establishmentId">
+          <label class="form-label"
+            >Estabelecimento <span class="required">*</span></label
+          >
+          <select
+            class="form-control"
+            name="establishmentId"
+            id="selectEstablishment"
+          >
+            <option value="">Selecione</option>
+          </select>
+          <span class="form-error">Obrigatório.</span>
+        </div>
+        <div class="form-group col-span-full" id="g-name">
+          <label class="form-label"
+            >Nome do Setor <span class="required">*</span></label
+          >
+          <input
+            type="text"
+            class="form-control"
+            name="name"
+            placeholder="Ex: Produção, Administrativo…"
+          />
+          <span class="form-error">Campo obrigatório.</span>
+        </div>
+        <div class="form-group col-span-full" id="g-description">
+          <label class="form-label">Descrição</label>
+          <textarea
+            class="form-control"
+            name="description"
+            rows="2"
+            placeholder="Descreva as atividades do setor…"
+          ></textarea>
+        </div>
+        <div class="form-group" id="g-managerName">
+          <label class="form-label">Responsável do Setor</label>
+          <input
+            type="text"
+            class="form-control"
+            name="managerName"
+            placeholder="Nome do responsável"
+          />
+        </div>
+        <div class="form-group" id="g-status">
+          <label class="form-label">Status</label>
+          <select class="form-control" name="status">
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+          </select>
+        </div>
+      </div>
+    </template>
+
+    <script type="module" src="assets/js/setores.js"></script>
+  </body>
+</html>

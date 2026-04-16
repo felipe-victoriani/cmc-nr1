@@ -1,0 +1,190 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "users": {
+      ".indexOn": ["email", "companyId", "tipo", "active"],
+      "$uid": {
+        ".read": "auth != null && ($uid === auth.uid || root.child('users').child(auth.uid).child('tipo').val() === 'admin_master')",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || $uid === auth.uid)"
+      }
+    },
+
+    "companies": {
+      ".indexOn": ["status", "cnpj"],
+      ".read": "auth != null && root.child('users').child(auth.uid).child('tipo').val() === 'admin_master'",
+      "$companyId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === $companyId)",
+        ".write": "auth != null && root.child('users').child(auth.uid).child('tipo').val() === 'admin_master'"
+      }
+    },
+
+    "establishments": {
+      ".indexOn": ["companyId", "status"],
+      "$establishmentId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && (root.child('users').child(auth.uid).child('tipo').val() === 'gestor_rh' || root.child('users').child(auth.uid).child('tipo').val() === 'tecnico_sst' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_unidade')))"
+      }
+    },
+
+    "departments": {
+      ".indexOn": ["companyId", "establishmentId", "status"],
+      "$departmentId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && (root.child('users').child(auth.uid).child('tipo').val() === 'gestor_rh' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_unidade')))"
+      }
+    },
+
+    "roles": {
+      ".indexOn": ["companyId", "establishmentId", "status"],
+      "$roleId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && (root.child('users').child(auth.uid).child('tipo').val() === 'gestor_rh' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_unidade')))"
+      }
+    },
+
+    "employees": {
+      ".indexOn": [
+        "companyId",
+        "establishmentId",
+        "departmentId",
+        "roleId",
+        "status",
+        "employmentType"
+      ],
+      "$employeeId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && (root.child('users').child(auth.uid).child('tipo').val() === 'gestor_rh' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_unidade')))"
+      }
+    },
+
+    "riskInventories": {
+      ".indexOn": [
+        "companyId",
+        "establishmentId",
+        "riskLevel",
+        "riskCategory",
+        "needsAction",
+        "createdAt"
+      ],
+      "$riskId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && (root.child('users').child(auth.uid).child('tipo').val() === 'tecnico_sst' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_unidade')))"
+      }
+    },
+
+    "actionPlans": {
+      ".indexOn": ["companyId", "riskId", "status", "dueDate", "priority"],
+      "$actionId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && (root.child('users').child(auth.uid).child('tipo').val() === 'tecnico_sst' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_rh' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_unidade')))"
+      }
+    },
+
+    "ergonomicsPsychosocial": {
+      ".indexOn": ["companyId", "establishmentId", "level", "createdAt"],
+      "$assessmentId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && (root.child('users').child(auth.uid).child('tipo').val() === 'tecnico_sst' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_rh')))"
+      }
+    },
+
+    "trainings": {
+      ".indexOn": ["companyId", "type", "createdAt"],
+      "$trainingId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && (root.child('users').child(auth.uid).child('tipo').val() === 'gestor_rh' || root.child('users').child(auth.uid).child('tipo').val() === 'tecnico_sst')))"
+      }
+    },
+
+    "trainingSessions": {
+      ".indexOn": ["companyId", "trainingId", "date"],
+      "$sessionId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && root.child('users').child(auth.uid).child('tipo').val() !== 'colaborador'))"
+      }
+    },
+
+    "trainingAttendance": {
+      ".indexOn": [
+        "trainingId",
+        "sessionId",
+        "employeeId",
+        "status",
+        "expirationDate"
+      ],
+      "$attendanceId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())"
+      }
+    },
+
+    "communications": {
+      ".indexOn": ["companyId", "category", "mandatoryRead", "createdAt"],
+      "$communicationId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && (root.child('users').child(auth.uid).child('tipo').val() === 'gestor_rh' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_unidade')))"
+      }
+    },
+
+    "communicationAcknowledgements": {
+      ".indexOn": ["communicationId", "employeeId", "acknowledged"],
+      "$ackId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val()"
+      }
+    },
+
+    "incidents": {
+      ".indexOn": [
+        "companyId",
+        "establishmentId",
+        "type",
+        "status",
+        "createdAt"
+      ],
+      "$incidentId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && root.child('users').child(auth.uid).child('tipo').val() !== 'colaborador'))"
+      }
+    },
+
+    "thirdParties": {
+      ".indexOn": ["companyId", "status"],
+      "$thirdPartyId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && root.child('users').child(auth.uid).child('tipo').val() !== 'colaborador'))"
+      }
+    },
+
+    "thirdPartyWorkers": {
+      ".indexOn": ["thirdPartyId", "companyId", "releaseStatus"],
+      "$thirdPartyWorkerId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && root.child('users').child(auth.uid).child('tipo').val() !== 'colaborador'))"
+      }
+    },
+
+    "documents": {
+      ".indexOn": ["companyId", "module", "category", "createdAt"],
+      "$documentId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('companyId').val() === data.child('companyId').val() || root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val())",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || (root.child('users').child(auth.uid).child('companyId').val() === newData.child('companyId').val() && root.child('users').child(auth.uid).child('tipo').val() !== 'colaborador'))"
+      }
+    },
+
+    "auditLogs": {
+      ".indexOn": ["userId", "module", "action", "createdAt"],
+      "$logId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_rh')",
+        ".write": "auth != null && !data.exists()"
+      }
+    },
+
+    "settings": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('tipo').val() === 'admin_master'"
+    }
+  }
+}

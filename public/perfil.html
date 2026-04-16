@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meu Perfil · CMV Contabilidade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/reset.css" />
+    <link rel="stylesheet" href="assets/css/variables.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/layout.css" />
+    <link rel="stylesheet" href="assets/css/components.css" />
+    <link rel="stylesheet" href="assets/css/pages.css" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <span class="brand-icon"
+            ><svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg
+          ></span>
+          <span class="brand-name">CMV Contabilidade</span>
+        </div>
+        <nav class="sidebar-nav" id="sidebarNav"></nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-user" id="sidebarUser"></div>
+        </div>
+        <button
+          class="sidebar-close-btn"
+          id="sidebarClose"
+          aria-label="Fechar menu"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="20"
+            height="20"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </aside>
+      <div class="sidebar-overlay hidden" id="sidebarOverlay"></div>
+
+      <div class="main-wrapper" id="mainWrapper">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button
+              class="topbar-menu-btn"
+              id="topbarMenuBtn"
+              aria-label="Menu"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <nav
+              class="breadcrumb"
+              id="breadcrumb"
+              aria-label="Breadcrumb"
+            ></nav>
+          </div>
+          <div class="topbar-right">
+            <div class="topbar-user" id="topbarUser"></div>
+          </div>
+        </header>
+
+        <main class="main-content" style="max-width: 760px">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Meu Perfil</h1>
+              <p class="page-subtitle">
+                Atualize suas informações pessoais e de segurança
+              </p>
+            </div>
+          </div>
+
+          <!-- Informações Pessoais -->
+          <div class="card" style="margin-bottom: var(--sp-4)">
+            <div class="card-header">
+              <h2 class="card-title">Informações Pessoais</h2>
+            </div>
+            <div class="card-body">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: var(--sp-4);
+                  margin-bottom: var(--sp-4);
+                "
+              >
+                <div class="avatar-lg" id="avatarDisplay">?</div>
+                <div>
+                  <div
+                    id="profileNameDisplay"
+                    style="font-size: var(--text-lg); font-weight: 600"
+                  >
+                    —
+                  </div>
+                  <div
+                    id="profileRoleDisplay"
+                    style="
+                      font-size: var(--text-sm);
+                      color: var(--clr-text-muted);
+                    "
+                  >
+                    —
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group col-span-full">
+                  <label class="form-label">Nome Completo</label>
+                  <input type="text" class="form-control" id="profileNome" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Telefone</label>
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="profilePhone"
+                    placeholder="(11) 99999-9999"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">E-mail (somente leitura)</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="profileEmail"
+                    readonly
+                    style="background: var(--clr-gray-50); cursor: not-allowed"
+                  />
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end">
+                <button class="btn btn-primary" id="btnSaveProfile">
+                  Salvar Informações
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alterar Senha -->
+          <div class="card" style="margin-bottom: var(--sp-4)">
+            <div class="card-header">
+              <h2 class="card-title">Alterar Senha</h2>
+            </div>
+            <div class="card-body">
+              <div class="form-grid">
+                <div class="form-group col-span-full">
+                  <label class="form-label">Senha Atual</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="currentPassword"
+                    autocomplete="current-password"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Nova Senha</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="newPassword"
+                    autocomplete="new-password"
+                    placeholder="Mínimo 8 caracteres"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirmar Nova Senha</label>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="confirmPassword"
+                    autocomplete="new-password"
+                  />
+                </div>
+              </div>
+              <div style="display: flex; justify-content: flex-end">
+                <button class="btn btn-warning" id="btnChangePassword">
+                  Alterar Senha
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sessões / Info -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Informações da Conta</h2>
+            </div>
+            <div class="card-body">
+              <dl
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: var(--sp-3);
+                "
+                id="accountInfo"
+              >
+                <div>
+                  <dt
+                    style="
+                      font-size: var(--text-sm);
+                      color: var(--clr-text-muted);
+                    "
+                  >
+                    Perfil de acesso
+                  </dt>
+                  <dd id="infoRole" style="font-weight: 500">—</dd>
+                </div>
+                <div>
+                  <dt
+                    style="
+                      font-size: var(--text-sm);
+                      color: var(--clr-text-muted);
+                    "
+                  >
+                    Último login
+                  </dt>
+                  <dd id="infoLastLogin" style="font-weight: 500">—</dd>
+                </div>
+                <div>
+                  <dt
+                    style="
+                      font-size: var(--text-sm);
+                      color: var(--clr-text-muted);
+                    "
+                  >
+                    ID do usuário
+                  </dt>
+                  <dd
+                    id="infoUid"
+                    style="
+                      font-weight: 500;
+                      font-size: var(--text-xs);
+                      word-break: break-all;
+                    "
+                  >
+                    —
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <div
+      class="modal-backdrop hidden"
+      id="modalBackdrop"
+      aria-hidden="true"
+    ></div>
+    <div class="global-loader hidden" id="globalLoader">
+      <div class="spinner"></div>
+    </div>
+
+    <script type="module" src="assets/js/perfil.js"></script>
+  </body>
+</html>

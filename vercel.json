@@ -1,0 +1,4 @@
+{
+  "outputDirectory": "public",
+  "routes": [{ "src": "^/$", "dest": "/login.html" }]
+}

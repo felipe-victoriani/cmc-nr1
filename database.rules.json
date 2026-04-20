@@ -173,7 +173,8 @@
       }
     },
     "auditLogs": {
-      ".indexOn": ["userId", "module", "action", "createdAt"],
+      ".indexOn": ["userId", "companyId", "module", "action", "createdAt"],
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_rh')",
       "$logId": {
         ".read": "auth != null && (root.child('users').child(auth.uid).child('tipo').val() === 'admin_master' || root.child('users').child(auth.uid).child('tipo').val() === 'gestor_rh')",
         ".write": "auth != null && !data.exists()"

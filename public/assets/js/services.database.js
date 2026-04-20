@@ -19,6 +19,15 @@ import {
   off,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getCurrentUser, getCurrentProfile } from "./auth.js";
+import {
+  cacheGet,
+  cacheSet,
+  cacheInvalidate,
+  cacheInvalidatePrefix,
+} from "./services.cache.js";
+
+/** Limite de segurança para downloads do RTDB — evita carregar coleções ilimitadas. */
+const QUERY_LIMIT = 500;
 
 // ──────────────────────────────────────────────────────────
 // CRUD GENÉRICO
@@ -52,15 +61,21 @@ export async function dbPush(path, data) {
 }
 
 /** Lista todos os filhos de um nó como array com {id, ...dados}. */
-export async function dbList(path) {
-  const snap = await get(ref(db, path));
+export async function dbList(path, limit = QUERY_LIMIT) {
+  const q = query(ref(db, path), limitToLast(limit));
+  const snap = await get(q);
   if (!snap.exists()) return [];
   return Object.entries(snap.val()).map(([id, val]) => ({ id, ...val }));
 }
 
 /** Lista filhos filtrando por campo = valor usando orderByChild. */
-export async function dbListByField(path, field, value) {
-  const q = query(ref(db, path), orderByChild(field), equalTo(value));
+export async function dbListByField(path, field, value, limit = QUERY_LIMIT) {
+  const q = query(
+    ref(db, path),
+    orderByChild(field),
+    equalTo(value),
+    limitToLast(limit),
+  );
   const snap = await get(q);
   if (!snap.exists()) return [];
   return Object.entries(snap.val()).map(([id, val]) => ({ id, ...val }));
@@ -84,6 +99,7 @@ export async function writeAuditLog({
       userId: user.uid,
       userName: profile?.fullName || user.email,
       profile: profile?.profile || "desconhecido",
+      companyId: profile?.companyId || null,
       module,
       action,
       recordId,
@@ -96,6 +112,35 @@ export async function writeAuditLog({
   }
 }
 
+/** Retorna os últimos `limit` registros do log de auditoria (admin e gestor_rh). */
+export async function getAuditLogs(limit = 200) {
+  const q = query(
+    ref(db, "auditLogs"),
+    orderByChild("createdAt"),
+    limitToLast(limit),
+  );
+  const snap = await get(q);
+  if (!snap.exists()) return [];
+  return Object.entries(snap.val())
+    .map(([id, val]) => ({ id, ...val }))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+/** Retorna os últimos `limit` logs filtrados por empresa. */
+export async function getAuditLogsByCompany(companyId, limit = 200) {
+  const q = query(
+    ref(db, "auditLogs"),
+    orderByChild("companyId"),
+    equalTo(companyId),
+    limitToLast(limit),
+  );
+  const snap = await get(q);
+  if (!snap.exists()) return [];
+  return Object.entries(snap.val())
+    .map(([id, val]) => ({ id, ...val }))
+    .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
+}
+
 // ──────────────────────────────────────────────────────────
 // HELPERS POR ENTIDADE — cada função encapsula
 // path + audit log para consistência
@@ -103,13 +148,19 @@ export async function writeAuditLog({
 
 // ── Empresas ─────────────────────────────────────────────
 export async function getCompanies() {
-  return dbList("companies");
+  const key = "companies:all";
+  const hit = cacheGet(key);
+  if (hit) return hit;
+  const data = await dbList("companies");
+  cacheSet(key, data);
+  return data;
 }
 export async function getCompany(id) {
   return dbGet(`companies/${id}`);
 }
 export async function saveCompany(data, id = null) {
   const ts = new Date().toISOString();
+  cacheInvalidate("companies:all");
   if (id) {
     await dbUpdate(`companies/${id}`, { ...data, updatedAt: ts });
     await writeAuditLog({
@@ -134,6 +185,7 @@ export async function saveCompany(data, id = null) {
   return newId;
 }
 export async function deleteCompany(id) {
+  cacheInvalidate("companies:all");
   await dbRemove(`companies/${id}`);
   await writeAuditLog({
     module: "companies",
@@ -145,14 +197,21 @@ export async function deleteCompany(id) {
 
 // ── Estabelecimentos ─────────────────────────────────────
 export async function getEstablishments(companyId = null) {
-  if (companyId) return dbListByField("establishments", "companyId", companyId);
-  return dbList("establishments");
+  const key = `establishments:${companyId ?? "all"}`;
+  const hit = cacheGet(key);
+  if (hit) return hit;
+  const data = companyId
+    ? await dbListByField("establishments", "companyId", companyId)
+    : await dbList("establishments");
+  cacheSet(key, data);
+  return data;
 }
 export async function getEstablishment(id) {
   return dbGet(`establishments/${id}`);
 }
 export async function saveEstablishment(data, id = null) {
   const ts = new Date().toISOString();
+  cacheInvalidatePrefix("establishments:");
   if (id) {
     await dbUpdate(`establishments/${id}`, { ...data, updatedAt: ts });
     await writeAuditLog({
@@ -177,6 +236,7 @@ export async function saveEstablishment(data, id = null) {
   return newId;
 }
 export async function deleteEstablishment(id) {
+  cacheInvalidatePrefix("establishments:");
   await dbRemove(`establishments/${id}`);
   await writeAuditLog({
     module: "establishments",
@@ -188,11 +248,18 @@ export async function deleteEstablishment(id) {
 
 // ── Setores ───────────────────────────────────────────────
 export async function getDepartments(companyId = null) {
-  if (companyId) return dbListByField("departments", "companyId", companyId);
-  return dbList("departments");
+  const key = `departments:${companyId ?? "all"}`;
+  const hit = cacheGet(key);
+  if (hit) return hit;
+  const data = companyId
+    ? await dbListByField("departments", "companyId", companyId)
+    : await dbList("departments");
+  cacheSet(key, data);
+  return data;
 }
 export async function saveDepartment(data, id = null) {
   const ts = new Date().toISOString();
+  cacheInvalidatePrefix("departments:");
   if (id) {
     await dbUpdate(`departments/${id}`, { ...data, updatedAt: ts });
     return id;
@@ -211,6 +278,7 @@ export async function saveDepartment(data, id = null) {
   return newId;
 }
 export async function deleteDepartment(id) {
+  cacheInvalidatePrefix("departments:");
   await dbRemove(`departments/${id}`);
   await writeAuditLog({
     module: "departments",
@@ -222,11 +290,18 @@ export async function deleteDepartment(id) {
 
 // ── Cargos ────────────────────────────────────────────────
 export async function getRoles(companyId = null) {
-  if (companyId) return dbListByField("roles", "companyId", companyId);
-  return dbList("roles");
+  const key = `roles:${companyId ?? "all"}`;
+  const hit = cacheGet(key);
+  if (hit) return hit;
+  const data = companyId
+    ? await dbListByField("roles", "companyId", companyId)
+    : await dbList("roles");
+  cacheSet(key, data);
+  return data;
 }
 export async function saveRole(data, id = null) {
   const ts = new Date().toISOString();
+  cacheInvalidatePrefix("roles:");
   if (id) {
     await dbUpdate(`roles/${id}`, { ...data, updatedAt: ts });
     return id;
@@ -245,6 +320,7 @@ export async function saveRole(data, id = null) {
   return newId;
 }
 export async function deleteRole(id) {
+  cacheInvalidatePrefix("roles:");
   await dbRemove(`roles/${id}`);
   await writeAuditLog({
     module: "roles",
@@ -667,18 +743,4 @@ export async function getSettings() {
 }
 export async function saveSettings(data) {
   await dbUpdate("settings", data);
-}
-
-// ── Audit Logs ─────────────────────────────────────────────
-export async function getAuditLogs(limit = 100) {
-  const q = query(
-    ref(db, "auditLogs"),
-    orderByChild("createdAt"),
-    limitToLast(limit),
-  );
-  const snap = await get(q);
-  if (!snap.exists()) return [];
-  return Object.entries(snap.val())
-    .map(([id, val]) => ({ id, ...val }))
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }

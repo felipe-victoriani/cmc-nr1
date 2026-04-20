@@ -117,7 +117,7 @@ function renderSummary() {
   _all.forEach((r) => {
     const k =
       r.riskLevel ||
-      calculateRiskLevel(Number(r.probability), Number(r.severity));
+      calculateRiskLevel(Number(r.probability), Number(r.severity)).key;
     counts[k] = (counts[k] || 0) + 1;
   });
   document.getElementById("riskSummary").innerHTML = `
@@ -147,7 +147,7 @@ function getFiltered() {
       (!haz || r.hazardType === haz) &&
       (!lvl ||
         (r.riskLevel ||
-          calculateRiskLevel(Number(r.probability), Number(r.severity))) ===
+          calculateRiskLevel(Number(r.probability), Number(r.severity)).key) ===
           lvl) &&
       (!est || r.establishmentId === est),
   );
@@ -177,7 +177,7 @@ function render() {
         .map((r) => {
           const level =
             r.riskLevel ||
-            calculateRiskLevel(Number(r.probability), Number(r.severity));
+            calculateRiskLevel(Number(r.probability), Number(r.severity)).key;
           return `<tr>
           <td style="max-width:260px"><div style="font-size:var(--text-sm)">${r.description ? (r.description.length > 80 ? r.description.substring(0, 80) + "…" : r.description) : "—"}</div></td>
           <td><span class="badge badge-info" style="font-size:var(--text-xs)">${HAZARD_LABELS[r.hazardType] || r.hazardType || "—"}</span></td>
@@ -281,12 +281,14 @@ function updateRiskPreview(container) {
   const prev = container.querySelector("#riskLevelPreview");
   if (!prev) return;
   if (!prob || !sev) {
+    console.log("[updateRiskPreview] Valores insuficientes — prob:", prob, "sev:", sev);
     prev.innerHTML =
       '<span style="color:var(--clr-text-muted)">— Selecione probabilidade e severidade</span>';
     return;
   }
-  const level = calculateRiskLevel(prob, sev);
-  prev.innerHTML = RISK_BADGE[level] || level;
+  const { key, level, score } = calculateRiskLevel(prob, sev);
+  console.log("[updateRiskPreview] prob:", prob, "sev:", sev, "→ score:", score, "level:", level, "key:", key);
+  prev.innerHTML = RISK_BADGE[key] || `<span>${level}</span>`;
 }
 
 async function submitForm(id = null) {
@@ -303,7 +305,7 @@ async function submitForm(id = null) {
   data.riskLevel = calculateRiskLevel(
     Number(data.probability),
     Number(data.severity),
-  );
+  ).key;
 
   try {
     await saveRisk(data, id);
@@ -356,7 +358,7 @@ function doExport() {
     r.probability || "",
     r.severity || "",
     r.riskLevel ||
-      calculateRiskLevel(Number(r.probability), Number(r.severity)),
+      calculateRiskLevel(Number(r.probability), Number(r.severity)).key,
     r.existingControls || "",
     r.proposedControls || "",
     STATUS_LABELS[r.status] || r.status || "",

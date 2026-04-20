@@ -64,6 +64,36 @@ export function isMaxLength(value, max) {
   return String(value || "").trim().length <= max;
 }
 
+/**
+ * Valida força de senha.
+ * Requisitos: mínimo 8 chars, letra maiúscula, minúscula, número e caractere especial.
+ * Retorna { valid: boolean, message: string }
+ */
+export function isStrongPassword(value) {
+  const v = String(value || "");
+  if (v.length < 8)
+    return { valid: false, message: "Senha deve ter no mínimo 8 caracteres." };
+  if (!/[A-Z]/.test(v))
+    return {
+      valid: false,
+      message: "Senha deve conter pelo menos uma letra maiúscula.",
+    };
+  if (!/[a-z]/.test(v))
+    return {
+      valid: false,
+      message: "Senha deve conter pelo menos uma letra minúscula.",
+    };
+  if (!/[0-9]/.test(v))
+    return { valid: false, message: "Senha deve conter pelo menos um número." };
+  if (!/[^A-Za-z0-9]/.test(v))
+    return {
+      valid: false,
+      message:
+        "Senha deve conter pelo menos um caractere especial (ex: !@#$%).",
+    };
+  return { valid: true, message: "" };
+}
+
 /* ─────────────────────────────────────────────────────────
    VALIDAÇÃO DE FORMULÁRIO
    ─────────────────────────────────────────────────────── */

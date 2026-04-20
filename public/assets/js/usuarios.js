@@ -7,6 +7,7 @@ import { requireProfile } from "./guards.js";
 import { initAppUI, setBreadcrumb, openModal, showToast } from "./ui.js";
 import { getCurrentProfile, getCurrentUser } from "./auth.js";
 import { formatDate, exportCSV } from "./utils.js";
+import { isStrongPassword } from "./validators.js";
 import {
   getUsers,
   saveUser,
@@ -320,8 +321,10 @@ async function saveForm() {
     return showToast("Selecione a empresa para este usuário.", "warning");
   if (!_editId && !password)
     return showToast("Senha é obrigatória para novo usuário.", "warning");
-  if (!_editId && password.length < 8)
-    return showToast("Senha deve ter no mínimo 8 caracteres.", "warning");
+  if (!_editId) {
+    const pwd = isStrongPassword(password);
+    if (!pwd.valid) return showToast(pwd.message, "warning");
+  }
 
   const saveBtn = document.getElementById("btnSaveUser");
   if (saveBtn) {
@@ -360,7 +363,7 @@ async function saveForm() {
     document.getElementById("modalBackdrop")?.dispatchEvent(new Event("click"));
     await loadData();
   } catch (err) {
-    console.error(err);
+    console.error(err.message || err);
     const msg =
       err.code === "auth/email-already-in-use"
         ? "E-mail já está em uso."

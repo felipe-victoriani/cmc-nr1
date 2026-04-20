@@ -76,7 +76,7 @@ async function loadData() {
     _all = (docs || []).filter((d) => !d.deleted);
     applyFilters();
   } catch (err) {
-    console.error(err);
+    console.error(err.message || err);
     showToast("Erro ao carregar documentos.", "error");
   } finally {
     showLoader(false);
@@ -331,7 +331,7 @@ async function saveForm() {
     document.getElementById("modalBackdrop")?.dispatchEvent(new Event("click"));
     await loadData();
   } catch (err) {
-    console.error(err);
+    console.error(err.message || err);
     showToast("Erro ao salvar documento: " + (err.message || ""), "error");
   } finally {
     if (saveBtn) {

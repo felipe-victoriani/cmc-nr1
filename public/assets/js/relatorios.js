@@ -110,7 +110,7 @@ async function loadAll() {
     renderTrainings();
     renderIncidents();
   } catch (err) {
-    console.error(err);
+    console.error(err.message || err);
     showToast("Erro ao carregar dados de relatórios.", "error");
   } finally {
     showLoader(false);

@@ -2,29 +2,46 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Qualquer usuário autenticado pode ler arquivos
-    // Escrita exige autenticação; controle fino é feito pela aplicação
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    // isAdminMaster: verifica custom claim definida via Admin SDK / Cloud Function.
+    // REQUISITO: ao criar/atualizar usuário, chamar Admin SDK para definir:
+    //   { companyId: "<id>", role: "admin_master" | "gestor_rh" | ... }
+    function isAdminMaster() {
+      return request.auth.token.role == 'admin_master';
+    }
+
+    // Verifica se o usuário pertence à empresa do caminho (via custom claim).
+    function belongsToCompany(companyId) {
+      return isAdminMaster()
+          || request.auth.token.companyId == companyId;
+    }
+
+    // ── Arquivos de empresa ───────────────────────────────────────────────────
+    // Leitura e escrita restritas à própria empresa do usuário.
     match /companies/{companyId}/{allPaths=**} {
-      allow read:   if request.auth != null;
+      allow read:   if request.auth != null && belongsToCompany(companyId);
       allow create: if request.auth != null
+                    && belongsToCompany(companyId)
                     && request.resource.size < 20 * 1024 * 1024   // max 20 MB
                     && (request.resource.contentType.matches('image/.*')
                      || request.resource.contentType.matches('application/pdf')
                      || request.resource.contentType.matches('application/vnd.openxmlformats.*')
                      || request.resource.contentType.matches('application/msword')
                      || request.resource.contentType.matches('text/.*'));
-      allow delete: if request.auth != null;
+      allow delete: if request.auth != null && belongsToCompany(companyId);
     }
 
-    // Fotos de perfil de usuário
+    // ── Fotos de perfil ───────────────────────────────────────────────────────
+    // Apenas o próprio usuário pode escrever; leitura exige autenticação.
     match /profile-photos/{userId}/{fileName} {
       allow read:   if request.auth != null;
-      allow write:  if request.auth != null && request.auth.uid == userId
+      allow write:  if request.auth != null
+                    && request.auth.uid == userId
                     && request.resource.size < 5 * 1024 * 1024
                     && request.resource.contentType.matches('image/.*');
     }
 
-    // Bloqueia tudo que não for mapeado
+    // Bloqueia tudo que não for mapeado explicitamente.
     match /{allPaths=**} {
       allow read, write: if false;
     }

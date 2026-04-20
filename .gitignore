@@ -2,8 +2,8 @@
 node_modules/
 .npm/
 
-# firebase-config.js (credenciais) — versionar apenas em repo privado
-# public/assets/js/firebase-config.js
+# firebase-config.js (credenciais) — NUNCA versionar!
+public/assets/js/firebase-config.js
 
 # Arquivo de setup temporário — deletar após uso
 public/setup-admin.html

@@ -91,7 +91,7 @@ async function loadProfile() {
       }
     }
   } catch (err) {
-    console.error(err);
+    console.error(err.message || err);
     showToast("Erro ao carregar perfil.", "error");
   } finally {
     showLoader(false);
@@ -128,7 +128,7 @@ async function saveProfile() {
 
     showToast("Perfil atualizado com sucesso.", "success");
   } catch (err) {
-    console.error(err);
+    console.error(err.message || err);
     showToast("Erro ao atualizar perfil.", "error");
   } finally {
     if (btn) {
@@ -166,7 +166,7 @@ async function handleChangePassword() {
     setVal("newPassword", "");
     setVal("confirmPassword", "");
   } catch (err) {
-    console.error(err);
+    console.error(err.message || err);
     const msg =
       err.code === "auth/wrong-password" ||
       err.code === "auth/invalid-credential"

@@ -4,6 +4,19 @@ Sistema web completo para gestão de conformidade com a **NR-1** e demais normas
 
 ---
 
+## Stack técnica
+
+| Camada         | Tecnologia                                                    |
+| -------------- | ------------------------------------------------------------- |
+| Frontend       | HTML5, CSS3 (custom properties), Vanilla JS ES Modules        |
+| Backend        | Firebase Realtime Database + Firebase Auth + Firebase Storage |
+| Deploy         | Vercel (estático) ou Firebase Hosting                         |
+| Testes         | Vitest — 124 testes (validators + utils)                      |
+| Linting        | ESLint                                                        |
+| Acessibilidade | WCAG 2.1 AA                                                   |
+
+---
+
 ## Funcionalidades
 
 | Módulo                  | Descrição                            |
@@ -22,6 +35,8 @@ Sistema web completo para gestão de conformidade com a **NR-1** e demais normas
 | Incidentes              | Registro e investigação de acidentes |
 | Terceiros               | Gestão de contratados/fornecedores   |
 | Documentos              | Repositório de documentos SST        |
+| EPI                     | Controle de equipamentos de proteção |
+| PCMSO                   | Programas de controle médico         |
 | Relatórios              | Painel consolidado de conformidade   |
 | Usuários                | Gestão de acesso (admin only)        |
 | Perfil                  | Auto-serviço do usuário logado       |
@@ -149,6 +164,8 @@ SaAS_NR1/
 ├── firebase.json
 ├── database.rules.json
 ├── storage.rules
+├── vercel.json
+├── build.js
 ├── .gitignore
 └── public/
     ├── login.html
@@ -167,29 +184,32 @@ SaAS_NR1/
     ├── incidentes.html
     ├── terceiros.html
     ├── documentos.html
+    ├── epi.html
+    ├── pcmso.html
     ├── relatorios.html
     ├── usuarios.html
     ├── perfil.html
+    ├── privacidade.html
     ├── setup-admin.html         ← deletar após uso
     └── assets/
         ├── css/
-        │   ├── variables.css
-        │   ├── reset.css
-        │   ├── base.css
-        │   ├── layout.css
-        │   ├── components.css
-        │   └── pages.css
+        │   ├── variables.css    # Design tokens / CSS custom properties
+        │   ├── reset.css        # Reset, focus-visible, skip-link, reduced-motion
+        │   ├── base.css         # Tipografia e elementos base
+        │   ├── layout.css       # Sidebar, topbar, main-wrapper
+        │   ├── components.css   # Botões, cards, formulários, badges, modais
+        │   └── pages.css        # Estilos específicos por página
         └── js/
-            ├── firebase-config.js      ← criar a partir do .example
+            ├── firebase-config.js        ← criar a partir do .example
             ├── firebase-config.example.js
             ├── firebase-init.js
             ├── auth.js
             ├── guards.js
-            ├── ui.js
+            ├── ui.js                     # Componentes UI reutilizáveis
             ├── utils.js
             ├── validators.js
-            ├── services.database.js
             ├── services.auth.js
+            ├── services.database.js
             ├── services.storage.js
             ├── dashboard.js
             └── [demais módulos].js
@@ -209,11 +229,51 @@ SaAS_NR1/
 
 ---
 
+## Qualidade e testes
+
+```bash
+# Instalar dependências
+npm install
+
+# Rodar a suíte de testes
+npm test
+# ou
+npx vitest run
+
+# Lint
+npx eslint public/assets/js/
+```
+
+A suíte cobre **124 testes unitários** (validators + utils) via Vitest. Todos devem passar antes de qualquer commit.
+
+---
+
+## Acessibilidade (WCAG 2.1 AA)
+
+O sistema foi auditado e corrigido conforme as diretrizes WCAG 2.1 nível AA:
+
+| Critério                         | Implementação                                                                                                              |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **1.3.1** Info e relações        | `aria-current="page"` no item ativo da navegação                                                                           |
+| **1.4.3** Contraste de texto     | Todos os textos ≥ 4.5:1 (incluindo sidebar, badges, placeholders)                                                          |
+| **1.4.10** Reflow                | Layouts de formulário colapsam em telas < 640 px                                                                           |
+| **1.4.11** Contraste não textual | Bordas de foco ≥ 3:1                                                                                                       |
+| **2.1.1** Teclado                | Modais, dropdowns e sidebar fecham com Escape; dropdown navega com Enter/Space                                             |
+| **2.3.3** Animação               | `prefers-reduced-motion` desativa todas as transições                                                                      |
+| **2.4.1** Ignorar blocos         | Skip-link "Ir para o conteúdo principal" em todas as páginas                                                               |
+| **2.4.7** Foco visível           | `outline: 3px solid` em todos os elementos focáveis                                                                        |
+| **4.1.2** Nome, função, valor    | Modais com `aria-labelledby` + trap de foco; dropdown com `role="menu"/"menuitem"` + `aria-expanded`; nav com `aria-label` |
+| **4.1.3** Mensagens de status    | Toasts com `role="alert"` (erros) ou `role="status"` (info/sucesso) + `aria-live`                                          |
+| Windows HC                       | `@media (forced-colors: active)` em todos os arquivos CSS                                                                  |
+
+---
+
 ## Segurança
 
 - `firebase-config.js` está no `.gitignore` — **nunca faça commit das suas credenciais**
 - As regras do Realtime Database isolam dados por `companyId`
 - Regras de Storage exigem autenticação para upload/download
+- Inputs sanitizados no lado do servidor via Firebase Rules
 
 ---
 

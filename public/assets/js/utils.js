@@ -167,22 +167,26 @@ export function calculateRiskLevel(probability, severity) {
   const s = parseInt(severity) || 1;
   const score = p * s;
 
-  let level, badgeClass;
+  let level, badgeClass, key;
   if (score <= 4) {
     level = "Baixo";
     badgeClass = "badge-risk-low";
+    key = "low";
   } else if (score <= 9) {
     level = "Moderado";
     badgeClass = "badge-risk-medium";
+    key = "medium";
   } else if (score <= 16) {
     level = "Alto";
     badgeClass = "badge-risk-high";
+    key = "high";
   } else {
     level = "Crítico";
     badgeClass = "badge-risk-critical";
+    key = "critical";
   }
 
-  return { score, level, badgeClass };
+  return { score, level, badgeClass, key };
 }
 
 /* ─────────────────────────────────────────────────────────

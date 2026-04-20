@@ -2,8 +2,11 @@
 // variáveis de ambiente do Vercel (configuradas no painel do projeto).
 // Executado automaticamente pelo Vercel antes do deploy.
 
-const fs = require("fs");
-const path = require("path");
+import { writeFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const required = [
   "FIREBASE_API_KEY",
@@ -36,12 +39,6 @@ export const firebaseConfig = {
 };
 `;
 
-const outPath = path.join(
-  __dirname,
-  "public",
-  "assets",
-  "js",
-  "firebase-config.js",
-);
-fs.writeFileSync(outPath, config, "utf8");
+const outPath = join(__dirname, "public", "assets", "js", "firebase-config.js");
+writeFileSync(outPath, config, "utf8");
 console.log("✅ firebase-config.js gerado com sucesso em", outPath);

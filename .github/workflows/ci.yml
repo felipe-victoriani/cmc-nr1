@@ -1,0 +1,103 @@
+# .github/workflows/ci.yml
+# Pipeline CI/CD — SST NR-1
+#
+# Jobs:
+#   quality  → Lint (ESLint) + Testes unitários com cobertura  (todo push/PR)
+#   deploy   → Build + Deploy para Vercel  (apenas push na branch main)
+#
+# Secrets necessários no GitHub (Settings → Secrets → Actions):
+#   VERCEL_TOKEN         — Token da conta Vercel (vercel.com → Account → Tokens)
+#   VERCEL_ORG_ID        — .vercel/project.json → "orgId"  (após `vercel link`)
+#   VERCEL_PROJECT_ID    — .vercel/project.json → "projectId"
+#   FIREBASE_API_KEY          ─┐
+#   FIREBASE_AUTH_DOMAIN       │
+#   FIREBASE_DATABASE_URL      │  Variáveis do Firebase (mesmo valor
+#   FIREBASE_PROJECT_ID        │  configurado no painel do Vercel)
+#   FIREBASE_STORAGE_BUCKET    │
+#   FIREBASE_MESSAGING_SENDER_ID ─┤
+#   FIREBASE_APP_ID           ─┘
+
+name: CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── 1. Qualidade: Lint + Testes ─────────────────────────────────────────────
+  quality:
+    name: Lint & Testes
+    runs-on: ubuntu-latest
+    env:
+      TZ: UTC # Garante datas determinísticas nos testes
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: Testes unitários com cobertura
+        run: npm run coverage
+
+      - name: Upload de cobertura para Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false # Não bloqueia o pipeline se Codecov estiver instável
+
+  # ── 2. Deploy para Vercel (apenas na main) ───────────────────────────────────
+  deploy:
+    name: Deploy para Vercel
+    needs: quality # Só roda após a etapa de qualidade passar
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependências e Vercel CLI
+        run: |
+          npm ci
+          npm install -g vercel@latest
+
+      - name: Gerar firebase-config.js a partir das variáveis de ambiente
+        run: node build.js
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+
+      - name: Fazer pull das configurações do projeto Vercel
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build e deploy para produção
+        run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}

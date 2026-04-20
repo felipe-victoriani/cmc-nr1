@@ -141,7 +141,9 @@ export function applyMask(input, type) {
     // Tenta restaurar posição do cursor
     try {
       input.setSelectionRange(pos, pos);
-    } catch {}
+    } catch {
+      /* posição do cursor não suportada neste contexto */
+    }
   });
 }
 

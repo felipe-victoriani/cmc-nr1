@@ -497,7 +497,7 @@ export function showToast(message, type = "info", duration = 4000) {
 /* ─────────────────────────────────────────────────────────
    MODAL
    ─────────────────────────────────────────────────────── */
-let _modalStack = [];
+const _modalStack = [];
 
 /**
  * Abre um modal.

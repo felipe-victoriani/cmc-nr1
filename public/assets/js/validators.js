@@ -46,7 +46,7 @@ export function isValidCNPJ(value) {
 }
 
 export function isValidPhone(value) {
-  return /^\(?\d{2}\)?[\s\-]?\d{4,5}[\s\-]?\d{4}$/.test(
+  return /^\(?\d{2}\)?[\s-]?\d{4,5}[\s-]?\d{4}$/.test(
     String(value).replace(/\s/g, ""),
   );
 }

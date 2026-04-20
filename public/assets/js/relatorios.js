@@ -57,7 +57,7 @@ const TRAINING_STATUS_LABELS = {
 // ─── State ────────────────────────────────────────────────────────────────────
 
 let _companyId = null;
-let _data = {
+const _data = {
   employees: [],
   risks: [],
   actions: [],

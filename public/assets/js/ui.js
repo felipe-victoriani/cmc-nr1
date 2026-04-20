@@ -239,6 +239,9 @@ function renderSidebar(profile) {
   const nav = document.getElementById("sidebarNav");
   if (!nav) return;
 
+  // WCAG 4.1.2 — landmark com rótulo acessível
+  nav.setAttribute("aria-label", "Menu de navegação principal");
+
   const userProf = profile.tipo ?? profile.profile;
   let html = "";
 
@@ -311,19 +314,20 @@ function renderTopbar(profile, user) {
 
   container.innerHTML = `
     <span class="topbar-user-name truncate" style="max-width:160px">${profile.nome || profile.fullName || user.email}</span>
-    <div class="topbar-avatar" id="topbarAvatarBtn" aria-haspopup="true" title="Menu do usuário">
+    <div class="topbar-avatar" id="topbarAvatarBtn" role="button" tabindex="0"
+         aria-haspopup="menu" aria-expanded="false" aria-label="Menu do usuário">
       ${initials}
-      <div class="user-dropdown hidden" id="userDropdown">
+      <div class="user-dropdown hidden" id="userDropdown" role="menu">
         <div class="user-dropdown-header">
           <div class="user-dropdown-name">${profile.nome || profile.fullName || "Usuário"}</div>
           <div class="user-dropdown-email">${user.email}</div>
         </div>
-        <a href="perfil.html" class="user-dropdown-item">
+        <a href="perfil.html" class="user-dropdown-item" role="menuitem">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 00-16 0"/></svg>
           Meu Perfil
         </a>
         <div class="dropdown-divider"></div>
-        <div class="user-dropdown-item danger" id="logoutBtn">
+        <div class="user-dropdown-item danger" id="logoutBtn" role="menuitem" tabindex="0">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Sair
         </div>
@@ -331,14 +335,32 @@ function renderTopbar(profile, user) {
     </div>
   `;
 
-  // Toggle dropdown
+  // Toggle dropdown com suporte a teclado (WCAG 2.1.1)
   const avatarBtn = document.getElementById("topbarAvatarBtn");
   const dropdown = document.getElementById("userDropdown");
+
+  const toggleDropdown = (open) => {
+    const isOpen = open ?? dropdown.classList.contains("hidden");
+    dropdown.classList.toggle("hidden", !isOpen);
+    avatarBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  };
+
   avatarBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    dropdown.classList.toggle("hidden");
+    toggleDropdown();
   });
-  document.addEventListener("click", () => dropdown.classList.add("hidden"));
+  avatarBtn.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggleDropdown();
+    } else if (e.key === "Escape") {
+      toggleDropdown(false);
+    }
+  });
+  document.addEventListener("click", () => toggleDropdown(false));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") toggleDropdown(false);
+  });
 
   // Logout
   document.getElementById("logoutBtn").addEventListener("click", async () => {
@@ -404,6 +426,15 @@ function setupSidebarToggle() {
       overlay.classList.add("hidden");
     });
   }
+
+  // WCAG 2.1.1 — Escape fecha sidebar no mobile
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && sidebar?.classList.contains("mobile-open")) {
+      sidebar.classList.remove("mobile-open");
+      overlay?.classList.add("hidden");
+      menuBtn?.focus();
+    }
+  });
 }
 
 function markActiveNavItem() {
@@ -411,6 +442,7 @@ function markActiveNavItem() {
   document.querySelectorAll(".nav-item[data-href]").forEach((el) => {
     if (el.dataset.href === currentPage) {
       el.classList.add("active");
+      el.setAttribute("aria-current", "page"); // WCAG 1.3.1
     }
   });
 }
@@ -468,6 +500,10 @@ export function showToast(message, type = "info", duration = 4000) {
 
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
+  // WCAG 4.1.3 — erros interrompem leitura (alert); demais são polite (status)
+  toast.setAttribute("role", type === "error" ? "alert" : "status");
+  toast.setAttribute("aria-live", type === "error" ? "assertive" : "polite");
+  toast.setAttribute("aria-atomic", "true");
   toast.innerHTML = `
     <div class="toast-indicator"></div>
     <div class="toast-icon">${TOAST_ICONS[type] || TOAST_ICONS.info}</div>
@@ -518,10 +554,16 @@ export function openModal({
   const backdrop = document.getElementById("modalBackdrop");
   if (!backdrop) return null;
 
+  // Salva foco atual para restaurar ao fechar (WCAG 2.4.3)
+  const previouslyFocused = document.activeElement;
+
+  const titleId = `modal-title-${Date.now()}`;
   const modal = document.createElement("div");
   modal.className = `modal ${size} animate-fade-in`;
   modal.setAttribute("role", "dialog");
   modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-labelledby", titleId);
+  modal.setAttribute("tabindex", "-1");
 
   const footerHtml = footer.length
     ? `<div class="modal-footer">${footer
@@ -534,7 +576,7 @@ export function openModal({
 
   modal.innerHTML = `
     <div class="modal-header">
-      <h2 class="modal-title">${title}</h2>
+      <h2 class="modal-title" id="${titleId}">${title}</h2>
       <button class="modal-close" aria-label="Fechar modal">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -552,7 +594,42 @@ export function openModal({
     backdrop.classList.add("hidden");
     backdrop.innerHTML = "";
     _modalStack.pop();
+    backdrop.removeEventListener("keydown", handleKey);
+    // Restaura foco ao elemento que abriu o modal (WCAG 2.4.3)
+    if (previouslyFocused && typeof previouslyFocused.focus === "function") {
+      previouslyFocused.focus();
+    }
   };
+
+  // Seletores de foco (WCAG 2.1.1 — trap de foco)
+  const FOCUSABLE =
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  const getFocusable = () => [...modal.querySelectorAll(FOCUSABLE)];
+
+  const handleKey = (e) => {
+    if (e.key === "Escape") {
+      closeModal();
+      return;
+    }
+    if (e.key === "Tab") {
+      const focusable = getFocusable();
+      if (focusable.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  };
+
+  backdrop.addEventListener("keydown", handleKey);
 
   modal.querySelector(".modal-close").addEventListener("click", closeModal);
   if (closeOnBackdrop) {
@@ -579,6 +656,16 @@ export function openModal({
     }
     if (f.handler) {
       btn.addEventListener("click", f.handler);
+    }
+  });
+
+  // Foca primeiro elemento focável ao abrir (WCAG 2.4.3)
+  requestAnimationFrame(() => {
+    const focusable = getFocusable();
+    if (focusable.length > 0) {
+      focusable[0].focus();
+    } else {
+      modal.focus();
     }
   });
 
@@ -693,7 +780,8 @@ export function renderPagination(
     if (p === "...") {
       pagesHtml += `<span class="page-btn" style="pointer-events:none">…</span>`;
     } else {
-      pagesHtml += `<button class="page-btn ${p === currentPage ? "active" : ""}" data-page="${p}">${p}</button>`;
+      const isCurrent = p === currentPage;
+      pagesHtml += `<button class="page-btn ${isCurrent ? "active" : ""}" data-page="${p}"${isCurrent ? ' aria-current="page"' : ""}>${p}</button>`;
     }
   }
 

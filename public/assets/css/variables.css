@@ -56,7 +56,9 @@
   --clr-border-focus: #3b82f6;
   --clr-text: #1e293b;
   --clr-text-secondary: #475569;
-  --clr-text-muted: #94a3b8;
+  --clr-text-muted: #6b7280; /* ≥4.6:1 em branco — WCAG AA ✓ */
+  --clr-placeholder: #94a3b8; /* para ::placeholder (isento WCAG) */
+  --clr-warning-text: #92400e; /* texto em badge-warning — WCAG AA ✓ */
 
   /* ── Cores de nível de risco (NR-1) ───────────────────────── */
   --clr-risk-low: #10b981;

@@ -83,8 +83,53 @@ dialog {
 }
 
 :focus-visible {
-  outline: 2px solid var(--clr-primary-500);
+  outline: 3px solid var(--clr-primary-500);
   outline-offset: 2px;
+}
+
+/* ── Skip-to-content (acessibilidade) ─────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--sp-4, 1rem);
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: var(--clr-primary-600, #1d4ed8);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0 0 6px 6px;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: -3px;
+}
+
+/* ── Motion reduzido (WCAG 2.3.3 / prefers-reduced-motion) ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── High-contrast (forced-colors / Windows HC) ───────────── */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid ButtonText;
+  }
+  .skip-link {
+    forced-color-adjust: none;
+    background: ButtonText;
+    color: ButtonFace;
+  }
 }
 
 /* Remove arrows de input number */

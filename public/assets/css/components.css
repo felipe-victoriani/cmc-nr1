@@ -163,10 +163,11 @@
   line-height: 1.5;
 }
 .form-control::placeholder {
-  color: var(--clr-text-muted);
+  color: var(--clr-placeholder); /* var dedicada, isenta WCAG */
 }
 .form-control:focus {
-  outline: none;
+  outline: 2px solid var(--clr-border-focus); /* WCAG 2.4.7 — foco visível */
+  outline-offset: 2px;
   border-color: var(--clr-border-focus);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
@@ -247,6 +248,37 @@ select.form-control {
 }
 .col-span-2 {
   grid-column: span 2;
+}
+
+/* ── Responsividade de grids em telas pequenas (WCAG 1.4.10) ── */
+@media (max-width: 640px) {
+  .form-grid-2,
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .col-span-2,
+  .col-span-3 {
+    grid-column: span 1;
+  }
+}
+
+/* ── High-contrast (forced-colors) para inputs ─────────────── */
+@media (forced-colors: active) {
+  .form-control {
+    border: 1px solid ButtonText;
+    forced-color-adjust: none;
+    background: Field;
+    color: FieldText;
+  }
+  .form-control:focus {
+    outline: 3px solid Highlight;
+  }
+  .btn {
+    forced-color-adjust: none;
+  }
+  .btn:focus-visible {
+    outline: 3px solid Highlight;
+  }
 }
 .col-span-3 {
   grid-column: span 3;
@@ -485,7 +517,7 @@ select.form-control {
 }
 .badge-warning {
   background: var(--clr-warning-100);
-  color: var(--clr-warning-600);
+  color: var(--clr-warning-text); /* #92400e — 6.25:1 em #fef3c7, WCAG AA ✓ */
 }
 .badge-danger {
   background: var(--clr-danger-100);

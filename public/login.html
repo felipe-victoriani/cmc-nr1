@@ -290,6 +290,27 @@
       role="status"
     ></div>
 
+    <footer
+      style="
+        width: 100%;
+        text-align: center;
+        padding: 1.5rem 0 0.5rem 0;
+        color: #fff;
+        font-size: var(--text-xs);
+        background: linear-gradient(
+          90deg,
+          var(--clr-primary-700) 0%,
+          var(--clr-primary-500) 100%
+        );
+        letter-spacing: 0.01em;
+        font-family: var(--font-family);
+        font-weight: 500;
+        box-shadow: 0 -2px 8px 0 rgba(37, 99, 235, 0.07);
+      "
+      aria-label="Créditos do sistema"
+    >
+      Sistema desenvolvido por Carlos Felipe Lima Victoriani
+    </footer>
     <script type="module">
       import { redirectIfAuthenticated } from "./assets/js/guards.js";
       import { signInUser } from "./assets/js/services.auth.js";
